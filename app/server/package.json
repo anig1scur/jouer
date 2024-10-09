@@ -1,0 +1,15 @@
+{
+    "name": "@jouer/server",
+    "version": "1.0.0",
+    "private": true,
+    "main": "./src/index.ts",
+    "dependencies": {
+        "@colyseus/monitor": "^0.15.8",
+        "@colyseus/schema": "^2.0.35",
+        "colyseus": "^0.15.17",
+        "compression": "^1.7.4",
+        "cors": "^2.8.5",
+        "express": "^4.21.1",
+        "path": "^0.12.7"
+    }
+}
