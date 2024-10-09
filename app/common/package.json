@@ -1,0 +1,9 @@
+{
+    "name": "@jouer/common",
+    "version": "1.0.0",
+    "private": true,
+    "main": "./src/index.ts",
+    "dependencies": {
+        "rbush": "^3.0.1"
+    }
+}

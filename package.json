@@ -1,0 +1,40 @@
+{
+    "name": "jouer",
+    "version": "1.0.0",
+    "private": true,
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/anig1scur/jouer"
+    },
+    "author": {
+        "name": "Eunice",
+        "url": "https://github.com/anig1scur"
+    },
+    "workspaces": [
+        "app/*"
+    ],
+    "scripts": {
+        "client": "yarn workspace @jouer/client",
+        "server": "yarn workspace @jouer/server",
+        "clean": "sh ./scripts/clean.sh",
+        "dev": "sh ./scripts/dev.sh",
+        "build": "ts-node ./scripts/build.ts",
+        "serve": "sh ./scripts/serve.sh"
+    },
+    "devDependencies": {
+        "@types/compression": "^1.7.5",
+        "@types/cors": "^2.8.17",
+        "@types/howler": "^2.2.12",
+        "@types/node": "^22.7.5",
+        "@types/pixi.js": "^5.0.0",
+        "@types/querystringify": "^2.0.2",
+        "@types/rbush": "^4.0.0",
+        "concurrently": "^9.0.1",
+        "esbuild": "^0.14.25",
+        "esbuild-plugin-svgr": "^2.1.0",
+        "nodemon": "^3.1.7",
+        "prettier": "^3.3.3",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.6.3"
+    }
+}
