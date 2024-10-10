@@ -104,6 +104,7 @@ const Home: React.FC = () => {
       <View flex>
         <Inline size="thin" />
         <Text>Welcome to Board Game Jouer !</Text>
+        <br />
         <Text>Pick your name</Text>
       </View>
       <Space size="xs" />

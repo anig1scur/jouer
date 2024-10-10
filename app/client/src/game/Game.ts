@@ -13,7 +13,7 @@ const ZINDEXES = {
 export interface Stats {
   roomName: string;
   playerName: string;
-  players: Player[];
+  players: Models.PlayerJSON[];
   playersCount: number;
   currentPlayerIndex: number;
   lastPlayedSet: Card[];
@@ -56,6 +56,7 @@ export class JouerGame {
     this.playersManager = new PlayersManager();
     this.playersManager.zIndex = ZINDEXES.PLAYERS;
     this.app.stage.addChild(this.playersManager);
+    // this.playersManager.
     this.onActionSend = onActionSend;
 
   }
@@ -77,13 +78,13 @@ export class JouerGame {
   };
 
   private initializeGame = () => {
-    this.deck.shuffle();
     this.dealCards();
     this.determineStartingPlayer();
   };
 
   private dealCards = () => {
     const players = this.playersManager.getAll();
+    console.log(players);
     const cardsPerPlayer = Math.floor(this.deck.remainingCards() / players.length);
 
     players.forEach(player => {
@@ -155,10 +156,22 @@ export class JouerGame {
   };
 
   getStats = (): Stats => {
+    const players: Models.PlayerJSON[] = this.playersManager.getAll().map((player) => ({
+      id: player.id,
+      name: player.name,
+      score: player.score,
+      isMyTurn: player === this.getCurrentPlayer(),
+      hand: [],
+      eaten: [],
+      borrowedCount: player.borrowedCount,
+      jouerCount: player.jouerCount,
+
+  }));
     return {
       roomName: "Jouer Game Room",
-      playerName: this.getCurrentPlayer().name,
-      players: this.playersManager.getAll(),
+      // playerName: this.getCurrentPlayer().name,
+      playerName: 'asdasd',
+      players,
       playersCount: this.playersManager.getAll().length,
       currentPlayerIndex: this.currentPlayerIndex,
       lastPlayedSet: this.lastPlayedSet,
@@ -166,12 +179,25 @@ export class JouerGame {
   };
 
   playerAdd = (playerId: string, attributes: Models.PlayerJSON, isMe: boolean) => {
-    const player = new Player(attributes);
-    this.playersManager.add(player);
-
+    const player = new Player({
+      x: 12,
+      y: 12,
+      radius: 10,
+      zIndex: ZINDEXES.PLAYERS,
+      textures: [],
+    }, playerId, attributes.name);
+    this.playersManager.add(player.id, player);
+    this.playersManager.addChild(player.sprite);
+    console.log(this.playersManager.children)
     // If the player is "you"
     if (isMe) {
-      this.me = new Player(attributes);
+      this.me = new Player({
+        x: 0,
+        y: 0,
+        zIndex: ZINDEXES.PLAYERS,
+        radius: 10,
+        textures: [],
+      }, playerId, attributes.name);
 
       this.playersManager.addChild(this.table);
 
@@ -187,7 +213,23 @@ export class JouerGame {
     }
   }
 
-  
+  playerUpdate = (playerId: string, attributes: Models.PlayerJSON, isMe: boolean) => {
+    const player = this.playersManager.get(playerId);
+    if (!player) {
+      return;
+    }
+
+    player.name = attributes.name;
+    player.score = attributes.score;
+    player.borrowedCount = attributes.borrowedCount;
+    player.jouerCount = attributes.jouerCount;
+
+    if (isMe) {
+      this.me = player;
+    }
+  }
+
+
 
   gameUpdate = (name: string, value: any) => {
     switch (name) {

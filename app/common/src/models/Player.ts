@@ -1,10 +1,42 @@
+
+// @type('string')
+// public id: string;
+
+// @type('string')
+// public name: string;
+
+// @type([Card])
+// public hand: Card[];
+
+// @type([Card])
+// public eaten: Card[];
+
+// @type('number')
+// public score: number;
+
+// @type('number')
+// public borrowedCount: number;
+
+// @type('number')
+// public jouerCount: number;
+
+// @type('boolean')
+// public isMyTurn: boolean;
+
+export interface CardJSON {
+  id: string;
+  value: number;
+  owner: string | null;
+  state: string;
+}
+
 export interface PlayerJSON {
-  playerId: string;
+  id: string;
   name: string;
-  color: string;
+  hand: CardJSON[];
+  eaten: CardJSON[];
   score: number;
-  cardsInHand: number;
-  isHost: boolean;
-  isReady: boolean;
-  myTurn: boolean;
+  borrowedCount: number;
+  jouerCount: number;
+  isMyTurn: boolean;
 }

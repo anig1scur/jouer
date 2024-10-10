@@ -50,8 +50,12 @@ export class CardsManager extends BaseManager<Card> {
   private playerHands: Map<string, Sprite[]> = new Map();
   private lastPlayedCards: Sprite[] = [];
 
+  constructor() {
+    super('Cards');
+  }
+
   addPlayerHand(playerId: string, cards: Card[]) {
-    // 为玩家创建手牌精灵并添加到容器中
+    // 为玩家创建手牌
   }
 
   updatePlayerHand(playerId: string, cards: Card[]) {
@@ -65,7 +69,7 @@ export class CardsManager extends BaseManager<Card> {
   // 其他用于管理卡牌显示的方法
 }
 
-export default class PlayersManager extends BaseManager<Player> {
+export class PlayersManager extends BaseManager<Player> {
   constructor() {
       super('Players');
   }

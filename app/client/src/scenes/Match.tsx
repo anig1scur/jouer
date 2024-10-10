@@ -1,13 +1,16 @@
-import React, { FC, useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Client, Room } from 'colyseus.js';
+import React, { Component, RefObject } from 'react';
+// import { RouteComponentProps, navigate } from '@reach/router';
+
 import { Constants, Maths, Models, Types } from '@jouer/common';
+
 import { JouerGame as Game } from '../game/Game';
 import { Helmet } from 'react-helmet';
 import { View } from '../components';
 import qs from 'querystringify';
 
-interface MatchProps {
+interface IProps {
+  roomId?: string;
 }
 
 export interface HUDProps {
@@ -16,59 +19,72 @@ export interface HUDProps {
   roomName: string;
   playerId: string;
   playerName: string;
+  playerLives: number;
+  playerMaxLives: number;
+  players: Models.PlayerJSON[];
   playersCount: number;
   playersMaxCount: number;
   messages: Models.MessageJSON[];
   announce?: string;
 }
 
-export const Match: FC<MatchProps> = () => {
-  const navigate = useNavigate();
-  const { roomId } = useParams<{ roomId: string }>();
-  const location = useLocation();
-
-  const canvasRef = useRef<HTMLDivElement>(null);
-
-  const [client, setClient] = useState<Client | null>(null);
-  const [room, setRoom] = useState<Room | null>(null);
-  const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
-
-  const [hud, setHud] = useState<HUDProps>({
-    gameMode: '',
-    gameModeEndsAt: 0,
-    roomName: '',
-    playerId: '',
-    playerName: '',
-    playerLives: 0,
-    playerMaxLives: 0,
-    playersCount: 0,
-    playersMaxCount: 0,
-    messages: [],
-    announce: '',
-  });
-
-  const handleActionSend = (action: Models.ActionJSON) => {
-    if (!room) {
-      return;
-    }
-
-    room.send(action.type, action);
-  };
-
-  const game = new Game(window.innerWidth, window.innerHeight, handleActionSend);
+interface IState {
+  hud: HUDProps;
+}
 
 
-  useEffect(() => {
-    start();
+export default class Match extends Component<IProps, IState> {
+  private canvasRef: RefObject<HTMLDivElement>;
 
-    return () => {
-      stop();
+  private game: Game;
+
+  private client?: Client;
+
+  private room?: Room;
+
+  private timer: NodeJS.Timeout | null = null;
+
+  // BASE
+  constructor (props: IProps) {
+    super(props);
+
+    this.canvasRef = React.createRef();
+    this.game = new Game(window.innerWidth, window.innerHeight, this.handleActionSend);
+
+    this.state = {
+      hud: {
+        gameMode: '',
+        gameModeEndsAt: 0,
+        roomName: '',
+        playerId: '',
+        playerName: '',
+        playerLives: 0,
+        playerMaxLives: 0,
+        players: [],
+        playersCount: 0,
+        playersMaxCount: 0,
+        messages: [],
+        announce: '',
+      },
     };
-  }, []);
+  }
 
-  const start = async () => {
+  componentDidMount() {
+    this.start();
+  }
+
+  componentWillUnmount() {
+    this.stop();
+  }
+
+  // LIFECYCLE
+  start = async () => {
+    // Navigate
+    let roomId = window.location.pathname.replace('/', '');
     const isNewRoom = roomId === 'new';
-    const parsedSearch = qs.parse(location.search) as Types.IRoomOptions;
+    const params = new URLSearchParams(window.location.search);
+    const search = params.toString();
+    const parsedSearch = qs.parse(search) as Types.IRoomOptions;
 
     let options;
     if (isNewRoom) {
@@ -77,105 +93,116 @@ export const Match: FC<MatchProps> = () => {
         roomMaxPlayers: Number(parsedSearch.roomMaxPlayers),
       };
     } else {
+      // The only thing to pass when joining an existing room is a player's name
       options = {
         playerName: localStorage.getItem('playerName'),
       };
     }
 
+    // Connect
     try {
       const host = window.document.location.host.replace(/:.*/, '');
       const port = process.env.NODE_ENV !== 'production' ? Constants.WS_PORT : window.location.port;
       const url = `${ window.location.protocol.replace('http', 'ws') }//${ host }${ port ? `:${ port }` : '' }`;
 
-      const newClient = new Client(url);
-      setClient(newClient);
-
-      let newRoom;
+      this.client = new Client(url);
       if (isNewRoom) {
-        newRoom = await newClient.create(Constants.ROOM_NAME, options);
-        window.history.replaceState(null, '', `/${ newRoom.id }`);
+        console.log(options, 'options');
+        this.room = await this.client.create(Constants.ROOM_NAME, options);
+
+        // We replace the "new" in the URL with the room's id
+        window.history.replaceState(null, '', `/${ this.room.id }`);
       } else {
-        newRoom = await newClient.joinById(roomId!, options);
+        this.room = await this.client.joinById(roomId, options);
       }
-
-      setRoom(newRoom);
-
-      setHud((prev) => ({
-        ...prev,
-        playerId: newRoom ? newRoom.sessionId : '',
-      }));
-
-      // Set up room state listeners
-      setupRoomListeners(newRoom);
-
-      // Start game
-      console.log(game, canvasRef.current);
-      if (game && canvasRef.current) {
-        game.start(canvasRef.current);
-      }
-
-      // Listen for inputs
-      window.addEventListener('resize', handleWindowResize);
-
-      // Start players refresh listeners
-      const newTimer = setInterval(updateRoom, Constants.PLAYERS_REFRESH);
-      setTimer(newTimer);
     } catch (error) {
-      navigate('/');
+      // navigate('/');
+      console.error('Error connecting to server', error);
+      window.location.href = '/';
+      return;
+    }
+
+    // Set the current player id
+    this.setState((prev) => ({
+      ...prev,
+      hud: {
+        ...prev.hud,
+        playerId: this.room ? this.room.sessionId : '',
+      },
+    }));
+
+    // Listen for state changes
+    this.room.state.game.onChange(this.handleGameChange);
+    this.room.state.players.onAdd(this.handlePlayerAdd);
+    this.room.state.players.onRemove(this.handlePlayerRemove);
+
+    // Listen for Messages
+    this.room.onMessage('*', this.handleMessage);
+
+    // Start game
+    this.game.start(this.canvasRef.current);
+
+    // Listen for inputs
+    window.addEventListener('resize', this.handleWindowResize);
+    console.log(this.room.state.players.onAdd)
+
+    // Start players refresh listeners
+    this.timer = setInterval(this.updateRoom, Constants.PLAYERS_REFRESH);
+  };
+
+  stop = () => {
+    // Colyseus
+    if (this.room) {
+      this.room.leave();
+    }
+
+    // Game
+    this.game.stop();
+
+    // Inputs
+    window.removeEventListener('resize', this.handleWindowResize);
+
+    // Start players refresh listeners
+    if (this.timer) {
+      clearInterval(this.timer);
     }
   };
 
-  const stop = () => {
-    if (room) {
-      room.leave();
-    }
-
-    if (game) {
-      game.stop();
-    }
-
-    window.removeEventListener('resize', handleWindowResize);
-
-    if (timer) {
-      clearInterval(timer);
-    }
-  };
-
-  const setupRoomListeners = (newRoom: Room) => {
-    newRoom.state.game.onChange = handleGameChange;
-    newRoom.state.players.onAdd = handlePlayerAdd;
-    newRoom.state.players.onRemove = handlePlayerRemove;
-
-    newRoom.onMessage('*', handleMessage);
-  };
-
-  const handleGameChange = (attributes: any) => {
+  // HANDLERS: Colyseus
+  handleGameChange = (attributes: any) => {
+    console.log(attributes, 'attributes')
     for (const row of attributes) {
-      game?.gameUpdate(row.field, row.value);
+      this.game.gameUpdate(row.field, row.value);
     }
   };
 
-  const handlePlayerAdd = (player: any, playerId: string) => {
-    const isMe = isPlayerIdMe(playerId);
-    game?.playerAdd(playerId, player, isMe);
-    updateRoom();
+  handlePlayerAdd = (player: any, playerId: string) => {
+
+    console.log('playerAdd', player);
+    const isMe = this.isPlayerIdMe(playerId);
+    this.game.playerAdd(playerId, player, isMe);
+    this.updateRoom();
 
     player.onChange = () => {
-      handlePlayerUpdate(player, playerId);
+      this.handlePlayerUpdate(player, playerId);
     };
   };
 
-  const handlePlayerRemove = (playerId: string) => {
-    const isMe = isPlayerIdMe(playerId);
-    game?.playerRemove(playerId, isMe);
-    updateRoom();
-  };
-  const handlePlayerUpdate = (player: any, playerId: string) => {
-    const isMe = isPlayerIdMe(playerId);
-    // game?.playerUpdate(playerId, player, isMe);
+  handlePlayerUpdate = (player: any, playerId: string) => {
+    const isMe = this.isPlayerIdMe(playerId);
+    this.game.playerUpdate(playerId, player, isMe);
   };
 
-  const handleMessage = (type: any, message: Models.MessageJSON) => {
+  handlePlayerRemove = (player: Models.PlayerJSON, playerId: string) => {
+    const isMe = this.isPlayerIdMe(playerId);
+    this.game.playerRemove(playerId, isMe);
+    this.updateRoom();
+  };
+
+
+  handleMessage = (type: any, message: Models.MessageJSON) => {
+    const { messages } = this.state.hud;
+
     let announce: string | undefined;
     switch (type) {
       case 'waiting':
@@ -194,42 +221,72 @@ export const Match: FC<MatchProps> = () => {
         break;
     }
 
-    setHud((prev) => ({
-      ...prev,
-      messages: [...prev.messages, message].slice(-Constants.LOG_LINES_MAX),
-      announce,
+    this.setState((prev) => ({
+      hud: {
+        ...prev.hud,
+        // Only set the last n messages (negative value on slice() is reverse)
+        messages: [...messages, message].slice(-Constants.LOG_LINES_MAX),
+        announce,
+      },
     }));
 
-    updateRoom();
+    this.updateRoom();
   };
 
-  const handleWindowResize = () => {
-    // game?.setScreenSize(window.innerWidth, window.innerHeight);
-  };
-
-  const isPlayerIdMe = (playerId: string) => {
-    return hud.playerId === playerId;
-  };
-
-  const updateRoom = () => {
-    const stats = game?.getStats();
-    if (stats) {
-      setHud((prev) => ({
-        ...prev,
-        ...stats,
-      }));
+  // HANDLERS: GameManager
+  handleActionSend = (action: Models.ActionJSON) => {
+    if (!this.room) {
+      return;
     }
+
+    this.room.send(action.type, action);
   };
 
+  // HANDLERS: Inputs
+  handleWindowResize = () => {
+    // this.game.setScreenSize(window.innerWidth, window.innerHeight);
+  };
 
-  return (
-    <View style={ { position: 'relative', height: '100%' } }>
-      <Helmet>
-        <title>{ `${ hud.roomName || hud.gameMode } [${ hud.playersCount }]` }</title>
-      </Helmet>
-      <div ref={ canvasRef } />
-    </View>
-  );
-};
+  // METHODS
+  isPlayerIdMe = (playerId: string) => {
+    return this.state.hud.playerId === playerId;
+  };
 
-export default Match;
+  updateRoom = () => {
+    const stats = this.game.getStats();
+
+      this.setState((prev) => ({
+        ...prev,
+        hud: {
+          ...prev.hud,
+          ...stats,
+        },
+      }));
+  }
+
+  // RENDER
+  render() {
+    const { hud } = this.state;
+
+    return (
+      <View
+        style={ {
+          position: 'relative',
+          height: '100%',
+        } }
+      >
+        {/* Set page's title */ }
+        <Helmet>
+          <title>{ `${ hud.roomName || hud.gameMode } [${ hud.playersCount }]` }</title>
+        </Helmet>
+
+        {/* Where PIXI is injected */ }
+        <div ref={ this.canvasRef } />
+
+      </View>
+    );
+  }
+
+
+}
+

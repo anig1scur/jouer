@@ -5,7 +5,7 @@ export const WS_PORT = 3001;
 export const ROOM_NAME = 'game'; // Colyseus Room<T>'s name (no need to change)
 export const ROOM_REFRESH = 3000;
 export const PLAYERS_REFRESH = 1000;
-export const DEBUG = false;
+export const DEBUG = true;
 
 // Game
 export const ROOM_PLAYERS_MIN = 2;

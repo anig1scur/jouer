@@ -18,8 +18,7 @@ app.use(compression());
 
 // Game server
 const server = new Server({
-    server: createServer(app),
-    express: app,
+    server: createServer(app)
 });
 
 // Game Rooms

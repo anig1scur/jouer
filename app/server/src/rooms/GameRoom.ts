@@ -26,13 +26,12 @@ export class GameRoom extends Room<GameState> {
     });
 
     // Init State
-    this.setState(new GameState(roomName, this.maxClients, options.mode, this.handleMessage));
+    this.setState(new GameState(roomName, this.maxClients, this.handleMessage));
 
     this.setSimulationInterval(() => this.handleTick());
 
     console.log(
-      `${ new Date().toISOString() } [Create] player=${ playerName } room=${ roomName } map=${ options.roomMap } max=${ this.maxClients
-      } mode=${ options.mode }`,
+      `${ new Date().toISOString() } [Create] player=${ playerName } room=${ roomName }max=${ this.maxClients } `,
     );
 
     // Listen to messages from clients
@@ -44,10 +43,7 @@ export class GameRoom extends Room<GameState> {
         case 'borrow':
         case 'play':
         case 'jouer':
-          this.state.playerPushAction({
-            playerId,
-            ...message,
-          });
+          console.log(`${ new Date().toISOString() } [Message] id=${ playerId } type=${ type }`);
           break;
         default:
           break;
@@ -57,7 +53,6 @@ export class GameRoom extends Room<GameState> {
 
   onJoin(client: Client, options: Types.IPlayerOptions) {
     this.state.playerAdd(client.sessionId, options.playerName);
-
     console.log(`${ new Date().toISOString() } [Join] id=${ client.sessionId } player=${ options.playerName }`);
   }
 
