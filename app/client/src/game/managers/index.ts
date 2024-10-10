@@ -1,9 +1,52 @@
 // managers.ts
 
 import { Container, Sprite } from 'pixi.js';
-import { Card, Player } from './entities';
+import { Card, Player } from '../entities';
+import { BaseEntity } from '../entities/BaseEntity';
 
-export class CardsManager extends Container {
+export class BaseManager<T extends BaseEntity> extends Container {
+    protected container: Container;
+
+    protected entities: { [key: string]: T };
+
+    constructor(name: string) {
+        super();
+        this.container = new Container();
+        this.container.name = name;
+        this.entities = {};
+    }
+
+    // Container
+    public show = () => {
+        this.visible = true;
+    };
+
+    public hide = () => {
+        this.visible = false;
+    };
+
+    // Entities
+    public add = (key: string, entity: T) => {
+        this.entities[key] = entity;
+        this.addChild(entity.container);
+    };
+
+    public get = (key: string): T | undefined => {
+        return this.entities[key];
+    };
+
+    public getAll = (): T[] => {
+        return Object.values(this.entities);
+    };
+
+    public remove = (key: string) => {
+        this.removeChild(this.entities[key].container);
+        delete this.entities[key];
+    };
+}
+
+
+export class CardsManager extends BaseManager<Card> {
   private playerHands: Map<string, Sprite[]> = new Map();
   private lastPlayedCards: Sprite[] = [];
 
@@ -22,20 +65,8 @@ export class CardsManager extends Container {
   // 其他用于管理卡牌显示的方法
 }
 
-export class PlayersManager extends Container {
-  private players: Map<string, Player> = new Map();
-
-  add(player: Player) {
-    this.players.set(player.id, player);
+export default class PlayersManager extends BaseManager<Player> {
+  constructor() {
+      super('Players');
   }
-
-  get(playerId: string): Player | undefined {
-    return this.players.get(playerId);
-  }
-
-  getAll(): Player[] {
-    return Array.from(this.players.values());
-  }
-
-  // 其他用于管理玩家的方法
 }

@@ -1,5 +1,6 @@
 import { Application, Container, Sprite, Text } from 'pixi.js';
 import { Card, Player, Deck } from './entities';
+import { Models } from '@jouer/common/src';
 import { CardsManager, PlayersManager } from './managers';
 
 const ZINDEXES = {
@@ -19,20 +20,29 @@ export interface Stats {
 }
 
 export class JouerGame {
+
+  private roomName: string;
+
   private app: Application;
   private table: Container;
   private deck: Deck;
+
+  private me: Player;
+
   private cardsManager: CardsManager;
   private playersManager: PlayersManager;
   private currentPlayerIndex: number = 0;
   private lastPlayedSet: Card[] = [];
+  private onActionSend: (action: Models.ActionJSON) => void;
 
-  constructor (screenWidth: number, screenHeight: number) {
-    this.app = new Application({
+
+  constructor (screenWidth: number, screenHeight: number, onActionSend: any) {
+    this.app = new Application();
+    this.app.init({
       width: screenWidth,
       height: screenHeight,
       backgroundColor: 'pink', // Green table color
-    });
+    })
 
     this.table = new Container();
     this.table.zIndex = ZINDEXES.TABLE;
@@ -46,6 +56,8 @@ export class JouerGame {
     this.playersManager = new PlayersManager();
     this.playersManager.zIndex = ZINDEXES.PLAYERS;
     this.app.stage.addChild(this.playersManager);
+    this.onActionSend = onActionSend;
+
   }
 
   start = (renderView: any) => {
@@ -54,6 +66,11 @@ export class JouerGame {
     this.app.ticker.add(this.update);
     this.initializeGame();
   };
+
+  stop = () => {
+    this.app.ticker.stop();
+    this.app.stop();
+  }
 
   private update = () => {
     // Update game state, animations, etc.
@@ -147,6 +164,41 @@ export class JouerGame {
       lastPlayedSet: this.lastPlayedSet,
     };
   };
+
+  playerAdd = (playerId: string, attributes: Models.PlayerJSON, isMe: boolean) => {
+    const player = new Player(attributes);
+    this.playersManager.add(player);
+
+    // If the player is "you"
+    if (isMe) {
+      this.me = new Player(attributes);
+
+      this.playersManager.addChild(this.table);
+
+    }
+  };
+
+  playerRemove = (playerId: string, isMe: boolean) => {
+    this.playersManager
+
+    // If the player is "you"
+    if (isMe) {
+      this.me = null;
+    }
+  }
+
+  
+
+  gameUpdate = (name: string, value: any) => {
+    switch (name) {
+      case 'roomName':
+        this.roomName = value;
+        break;
+      default:
+        break;
+    }
+  };
+
 
   // Additional methods for game logic, state updates, etc.
 }

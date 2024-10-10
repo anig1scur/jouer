@@ -1,5 +1,5 @@
 import { AnimatedSprite, Container, Graphics, Texture } from 'pixi.js';
-import { Constants, Geometry } from '@jouer/common';
+import { Constants } from '@jouer/common';
 
 export interface BaseProps {
     x: number;
@@ -13,8 +13,6 @@ export class BaseEntity {
     container: Container;
 
     sprite: AnimatedSprite;
-
-    body: Geometry.CircleBody;
 
     debug?: Graphics;
 
@@ -47,9 +45,6 @@ export class BaseEntity {
         this.container.x = props.x;
         this.container.y = props.y;
         this.container.sortChildren();
-
-        // Body
-        this.body = new Geometry.CircleBody(props.x, props.y, props.radius);
     }
 
     // Setters
