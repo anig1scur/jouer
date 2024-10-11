@@ -1,8 +1,7 @@
 import { Client, Room } from 'colyseus.js';
 import React, { Component, RefObject } from 'react';
-// import { RouteComponentProps, navigate } from '@reach/router';
 
-import { Constants, Maths, Models, Types } from '@jouer/common';
+import { Constants, Models, Types } from '@jouer/common';
 
 import { JouerGame as Game } from '../game/Game';
 import { Helmet } from 'react-helmet';
@@ -140,7 +139,7 @@ export default class Match extends Component<IProps, IState> {
     this.room.onMessage('*', this.handleMessage);
 
     // Start game
-    this.game.start(this.canvasRef.current);
+    this.game.start();
 
     // Listen for inputs
     window.addEventListener('resize', this.handleWindowResize);
@@ -255,13 +254,13 @@ export default class Match extends Component<IProps, IState> {
   updateRoom = () => {
     const stats = this.game.getStats();
 
-      this.setState((prev) => ({
-        ...prev,
-        hud: {
-          ...prev.hud,
-          ...stats,
-        },
-      }));
+    this.setState((prev) => ({
+      ...prev,
+      hud: {
+        ...prev.hud,
+        ...stats,
+      },
+    }));
   }
 
   // RENDER
@@ -269,24 +268,9 @@ export default class Match extends Component<IProps, IState> {
     const { hud } = this.state;
 
     return (
-      <View
-        style={ {
-          position: 'relative',
-          height: '100%',
-        } }
-      >
-        {/* Set page's title */ }
-        <Helmet>
-          <title>{ `${ hud.roomName || hud.gameMode } [${ hud.playersCount }]` }</title>
-        </Helmet>
-
-        {/* Where PIXI is injected */ }
-        <div ref={ this.canvasRef } />
-
-      </View>
+      <Helmet>
+        <title>{ `${ hud.roomName || hud.gameMode } [${ hud.playersCount }]` }</title>
+      </Helmet>
     );
   }
-
-
 }
-

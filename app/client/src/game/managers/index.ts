@@ -1,8 +1,7 @@
 // managers.ts
 
 import { Container, Sprite } from 'pixi.js';
-import { Card, Player } from '../entities';
-import { BaseEntity } from '../entities/BaseEntity';
+import { Card, Player, BaseEntity } from '../entities';
 
 export class BaseManager<T extends BaseEntity> extends Container {
     protected container: Container;

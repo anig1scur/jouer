@@ -19,6 +19,31 @@ export interface Stats {
   lastPlayedSet: Card[];
 }
 
+export const app = new Application();
+
+function resize() {
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight;
+  const minWidth = 600;
+  const minHeight = 400;
+
+  // Calculate renderer and canvas sizes based on current dimensions
+  const scaleX = windowWidth < minWidth ? minWidth / windowWidth : 1;
+  const scaleY = windowHeight < minHeight ? minHeight / windowHeight : 1;
+  const scale = scaleX > scaleY ? scaleX : scaleY;
+  const width = windowWidth * scale;
+  const height = windowHeight * scale;
+
+  // Update canvas style dimensions and scroll window up to avoid issues on mobile resize
+  app.renderer.canvas.style.width = `${ windowWidth }px`;
+  app.renderer.canvas.style.height = `${ windowHeight }px`;
+  window.scrollTo(0, 0);
+
+  // Update renderer  and navigation screens dimensions
+  app.renderer.resize(width, height);
+}
+
+
 export class JouerGame {
 
   private roomName: string;
@@ -37,11 +62,12 @@ export class JouerGame {
 
 
   constructor (screenWidth: number, screenHeight: number, onActionSend: any) {
-    this.app = new Application();
+    this.app = app;
     this.app.init({
+      backgroundColor: 'pink',
       width: screenWidth,
       height: screenHeight,
-      backgroundColor: 'pink', // Green table color
+      autoDensity: true,
     })
 
     this.table = new Container();
@@ -61,8 +87,9 @@ export class JouerGame {
 
   }
 
-  start = (renderView: any) => {
-    renderView.appendChild(this.app.view);
+  start = () => {
+    let rootDom = document.getElementById('root');
+    rootDom.appendChild(this.app.canvas);
     this.app.start();
     this.app.ticker.add(this.update);
     this.initializeGame();
@@ -166,7 +193,7 @@ export class JouerGame {
       borrowedCount: player.borrowedCount,
       jouerCount: player.jouerCount,
 
-  }));
+    }));
     return {
       roomName: "Jouer Game Room",
       // playerName: this.getCurrentPlayer().name,
@@ -229,8 +256,6 @@ export class JouerGame {
     }
   }
 
-
-
   gameUpdate = (name: string, value: any) => {
     switch (name) {
       case 'roomName':
@@ -242,5 +267,4 @@ export class JouerGame {
   };
 
 
-  // Additional methods for game logic, state updates, etc.
 }
