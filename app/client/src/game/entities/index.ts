@@ -28,7 +28,7 @@ export class BaseEntity {
     //   0.5,
     // );
     this.sprite = new Graphics();
-    this.sprite.beginFill(0x22AACC).drawCircle(400, 200, 80).endFill();
+    this.sprite.fill(0x22AACC).circle(400, 200, 80).fill();
     this.sprite.position.set(props.radius, props.radius);
     this.sprite.width = props.radius * 2;
     this.sprite.height = props.radius * 2;

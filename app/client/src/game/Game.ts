@@ -1,5 +1,6 @@
 import { Application, Container, Sprite, Text } from 'pixi.js';
 import { Card, Player, Deck } from './entities';
+import { Hand } from './entities/Card';
 import { Models } from '@jouer/common/src';
 import { CardsManager, PlayersManager } from './managers';
 
@@ -68,6 +69,7 @@ export class JouerGame {
       width: screenWidth,
       height: screenHeight,
       autoDensity: true,
+      resolution: window.devicePixelRatio || 1,
     })
 
     this.table = new Container();
@@ -79,6 +81,8 @@ export class JouerGame {
     this.cardsManager.zIndex = ZINDEXES.CARDS;
     this.app.stage.addChild(this.cardsManager);
 
+    // this.app.stage.addChild(new C(5, 0xFFC0CB, 8, 0xC0C0C0, 150, 200));
+    this.app.stage.addChild(new Hand([[5, 8], [7, 9], [2, 1], [8, 3], [3, 1]]));
     this.playersManager = new PlayersManager();
     this.playersManager.zIndex = ZINDEXES.PLAYERS;
     this.app.stage.addChild(this.playersManager);
