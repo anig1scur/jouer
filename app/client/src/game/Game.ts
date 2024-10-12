@@ -1,4 +1,4 @@
-import { Application, Container, Sprite, Text } from 'pixi.js';
+import { Application, Container, Texture, Sprite, Text } from 'pixi.js';
 import { Card, Player, Deck } from './entities';
 import { Hand } from './entities/Card';
 import { Models } from '@jouer/common/src';
@@ -61,16 +61,52 @@ export class JouerGame {
   private lastPlayedSet: Card[] = [];
   private onActionSend: (action: Models.ActionJSON) => void;
 
-
   constructor (screenWidth: number, screenHeight: number, onActionSend: any) {
     this.app = app;
     this.app.init({
-      backgroundColor: 'pink',
       width: screenWidth,
       height: screenHeight,
       autoDensity: true,
-      resolution: window.devicePixelRatio || 1,
+      antialias: true,
+      resolution: 2
     })
+
+    let color1 = '#FBE89A';
+    let color2 = '#F69C6C';
+
+    let canvas = document.createElement('canvas');
+
+    let ctx = canvas.getContext('2d');
+    let gradientFill = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradientFill.addColorStop(0, color1);
+    gradientFill.addColorStop(1, color2);
+
+    ctx.fillStyle = gradientFill;
+    ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+    let texture = Texture.from(canvas);
+
+    let sprite = new Sprite(texture);
+    sprite.width = window.innerWidth;
+    sprite.height = window.innerHeight;
+
+    app.stage.addChild(sprite);
+
+    window.addEventListener('resize', () => {
+      app.renderer.resize(window.innerWidth, window.innerHeight);
+
+      canvas.height = window.innerHeight;
+      gradientFill = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradientFill.addColorStop(0, color1);
+      gradientFill.addColorStop(1, color2);
+      ctx.fillStyle = gradientFill;
+      ctx.fillRect(0, 0, 1, canvas.height);
+
+      texture.update();
+      sprite.width = window.innerWidth;
+      sprite.height = window.innerHeight;
+
+    });
 
     this.table = new Container();
     this.table.zIndex = ZINDEXES.TABLE;
