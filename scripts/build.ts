@@ -1,5 +1,4 @@
 import {build} from 'esbuild';
-import svgrPlugin from 'esbuild-plugin-svgr';
 import alias from 'esbuild-plugin-alias';
 
 type Environment = 'production' | 'development';

@@ -1,9 +1,9 @@
-import { Application, Container, Texture, Sprite, Text } from 'pixi.js';
-import { Card, Deck } from './entities';
-import { Hand } from './entities/Card';
-import { Player  } from './entities/Player';
-import { Models } from '@jouer/common/src';
-import { CardsManager, PlayersManager } from './managers';
+import {Application, Container, Texture, Sprite, Text} from 'pixi.js';
+import {Card, Deck} from './entities';
+import {Hand} from './entities/Card';
+import {Player} from './entities/Player';
+import {Models} from '@jouer/common/src';
+import {CardsManager, PlayersManager} from './managers';
 
 const ZINDEXES = {
   TABLE: 1,
@@ -37,17 +37,15 @@ function resize() {
   const height = windowHeight * scale;
 
   // Update canvas style dimensions and scroll window up to avoid issues on mobile resize
-  app.renderer.canvas.style.width = `${ windowWidth }px`;
-  app.renderer.canvas.style.height = `${ windowHeight }px`;
+  app.renderer.canvas.style.width = `${windowWidth}px`;
+  app.renderer.canvas.style.height = `${windowHeight}px`;
   window.scrollTo(0, 0);
 
   // Update renderer  and navigation screens dimensions
   app.renderer.resize(width, height);
 }
 
-
 export class JouerGame {
-
   private roomName: string;
 
   private app: Application;
@@ -62,7 +60,7 @@ export class JouerGame {
   private lastPlayedSet: Card[] = [];
   private onActionSend: (action: Models.ActionJSON) => void;
 
-  constructor (screenWidth: number, screenHeight: number, onActionSend: any) {
+  constructor(screenWidth: number, screenHeight: number, onActionSend: any) {
     this.app = app;
     this.app.init({
       backgroundAlpha: 0,
@@ -71,8 +69,8 @@ export class JouerGame {
       resizeTo: window,
       autoDensity: true,
       antialias: true,
-      resolution: 2
-    })
+      resolution: 2,
+    });
 
     let color1 = '#FBE89A';
     let color2 = '#F69C6C';
@@ -108,7 +106,6 @@ export class JouerGame {
       texture.update();
       sprite.width = window.innerWidth;
       sprite.height = window.innerHeight;
-
     });
 
     this.table = new Container();
@@ -121,14 +118,25 @@ export class JouerGame {
     this.app.stage.addChild(this.cardsManager);
 
     // this.app.stage.addChild(new C(5, 0xFFC0CB, 8, 0xC0C0C0, 150, 200));
-    this.app.stage.addChild(new Hand([[5, 8], [7, 9], [5, 8], [7, 9],[5, 8], [7, 9],[2, 1], [8, 3], [3, 1]]));
+    const hand = new Hand([
+      [5, 8],
+      [7, 9],
+      [5, 8],
+      [7, 9],
+      [5, 8],
+      [7, 9],
+      [2, 1],
+      [8, 3],
+      [3, 1],
+    ]);
+    hand.position.set(500, 500);
+    this.app.stage.addChild(hand);
     this.playersManager = new PlayersManager();
     this.playersManager.zIndex = ZINDEXES.PLAYERS;
     this.app.stage.addChild(this.playersManager);
-    this.app.stage.addChild(new Player('Player 1', 5, 10));
+    this.app.stage.addChild(new Player('Eunice', 5, 10));
     // this.playersManager.
     this.onActionSend = onActionSend;
-
   }
 
   start = () => {
@@ -142,7 +150,7 @@ export class JouerGame {
   stop = () => {
     this.app.ticker.stop();
     this.app.stop();
-  }
+  };
 
   private update = () => {
     // Update game state, animations, etc.
@@ -158,7 +166,7 @@ export class JouerGame {
     console.log(players);
     const cardsPerPlayer = Math.floor(this.deck.remainingCards() / players.length);
 
-    players.forEach(player => {
+    players.forEach((player) => {
       const cards = this.deck.draw(cardsPerPlayer);
       player.setHand(cards);
       this.cardsManager.addPlayerHand(player.id, cards);
@@ -177,7 +185,7 @@ export class JouerGame {
     }
 
     if (!this.isValidPlay(cards)) {
-      throw new Error("Invalid play!");
+      throw new Error('Invalid play!');
     }
 
     player.removeCardsFromHand(cards);
@@ -236,10 +244,9 @@ export class JouerGame {
       eaten: [],
       borrowedCount: player.borrowedCount,
       jouerCount: player.jouerCount,
-
     }));
     return {
-      roomName: "Jouer Game Room",
+      roomName: 'Jouer Game Room',
       // playerName: this.getCurrentPlayer().name,
       playerName: 'asdasd',
       players,
@@ -250,39 +257,46 @@ export class JouerGame {
   };
 
   playerAdd = (playerId: string, attributes: Models.PlayerJSON, isMe: boolean) => {
-    const player = new Player({
-      x: 12,
-      y: 12,
-      radius: 10,
-      zIndex: ZINDEXES.PLAYERS,
-      textures: [],
-    }, playerId, attributes.name);
+    const player = new Player(
+      {
+        x: 12,
+        y: 12,
+        radius: 10,
+        zIndex: ZINDEXES.PLAYERS,
+        textures: [],
+      },
+      playerId,
+      attributes.name
+    );
     this.playersManager.add(player.id, player);
     this.playersManager.addChild(player.sprite);
-    console.log(this.playersManager.children)
+    console.log(this.playersManager.children);
     // If the player is "you"
     if (isMe) {
-      this.me = new Player({
-        x: 0,
-        y: 0,
-        zIndex: ZINDEXES.PLAYERS,
-        radius: 10,
-        textures: [],
-      }, playerId, attributes.name);
+      this.me = new Player(
+        {
+          x: 0,
+          y: 0,
+          zIndex: ZINDEXES.PLAYERS,
+          radius: 10,
+          textures: [],
+        },
+        playerId,
+        attributes.name
+      );
 
       this.playersManager.addChild(this.table);
-
     }
   };
 
   playerRemove = (playerId: string, isMe: boolean) => {
-    this.playersManager
+    this.playersManager;
 
     // If the player is "you"
     if (isMe) {
       this.me = null;
     }
-  }
+  };
 
   playerUpdate = (playerId: string, attributes: Models.PlayerJSON, isMe: boolean) => {
     const player = this.playersManager.get(playerId);
@@ -298,7 +312,7 @@ export class JouerGame {
     if (isMe) {
       this.me = player;
     }
-  }
+  };
 
   gameUpdate = (name: string, value: any) => {
     switch (name) {
@@ -309,6 +323,4 @@ export class JouerGame {
         break;
     }
   };
-
-
 }

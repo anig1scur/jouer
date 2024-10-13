@@ -1,27 +1,24 @@
 import * as PIXI from 'pixi.js';
-import HandSvg from '../assets/hand.svg';
-import HandPng from '../assets/hand.png';
+import Hand from '../assets/hand.png';
+import Face from '../assets/face.png';
+import Score from '../assets/score.png';
+import BoardBg from '../assets/boardBg.png';
 
 export class AssetsLoader {
-  private resources: any = {};
+  private resources: Record<string, PIXI.Sprite | PIXI.Graphics> = {};
 
   public async load(assets: {alias: string; src: string}[]): Promise<void> {
-    const loadPromises = assets.map((asset) => {
-      if (asset.src.endsWith('.png') || asset.src.endsWith('.jpg') || asset.src.endsWith('.jpeg')) {
-        return PIXI.Assets.load(asset.src).then((texture) => {
-          this.resources[asset.alias] = new PIXI.Sprite(texture);
-        });
-      } else if (asset.src.endsWith('.svg')) {
-        return PIXI.Assets.load({
+    const loadPromises = assets.map(async (asset) => {
+      if (asset.src.endsWith('.svg')) {
+        const graphicsData = await PIXI.Assets.load({
           alias: asset.alias,
           src: asset.src,
           data: {parseAsGraphicsContext: true},
-        }).then((graphicsData) => {
-          const graphics = new PIXI.Graphics(graphicsData);
-          this.resources[asset.alias] = graphics;
         });
+        this.resources[asset.alias] = new PIXI.Graphics(graphicsData);
       } else {
-        return Promise.reject(new Error(`Unsupported file type: ${asset.src}`));
+        const texture = await PIXI.Assets.load(asset.src);
+        this.resources[asset.alias] = new PIXI.Sprite(texture);
       }
     });
 
@@ -33,14 +30,79 @@ export class AssetsLoader {
   }
 }
 
-export class Player extends PIXI.Container {
+class StatsBoard extends PIXI.Container {
   private hand: number;
   private score: number;
-  private faceSprite: PIXI.Sprite | PIXI.Graphics;
   private handSprite: PIXI.Sprite;
   private scoreSprite: PIXI.Sprite;
   private handCountText: PIXI.Text;
   private scoreCountText: PIXI.Text;
+  private assetsLoader: AssetsLoader;
+
+  constructor(hand: number, score: number, assetsLoader: AssetsLoader) {
+    super();
+    this.hand = hand;
+    this.score = score;
+    this.assetsLoader = assetsLoader;
+    this.initialize();
+  }
+
+  private createSprite(alias: string, options: Partial<PIXI.Sprite>): PIXI.Sprite {
+    const sprite = this.assetsLoader.get(alias) as PIXI.Sprite;
+    Object.assign(sprite, options);
+    this.addChild(sprite);
+    return sprite;
+  }
+
+  private createText(text: string, style: Partial<PIXI.TextStyle>, x: number, y: number): PIXI.Text {
+    const textObj = new PIXI.Text(text, {
+      fontFamily: 'jmadh',
+      fontSize: 48,
+      fill: 0x70422f,
+      ...style,
+    });
+    textObj.position.set(x, y);
+    this.addChild(textObj);
+    return textObj;
+  }
+
+  private initialize(): void {
+    const commonSpriteOptions = {width: 48, height: 48};
+    const commonTextStyle = {fontSize: 64};
+
+    const boardBg = this.createSprite('boardBg', commonSpriteOptions);
+    boardBg.width = 140;
+    boardBg.height = 160;
+    boardBg.position.set(0, 0);
+    this.addChild(boardBg);
+
+    this.handSprite = this.createSprite('hand', commonSpriteOptions);
+    this.handSprite.position.set(20, 10);
+
+    this.handCountText = this.createText(this.hand.toString(), commonTextStyle, 80, 0);
+
+    this.scoreSprite = this.createSprite('score', commonSpriteOptions);
+    this.scoreSprite.position.set(20, 85);
+
+    this.scoreCountText = this.createText(this.score.toString(), commonTextStyle, 80, 80);
+  }
+
+  public updateHand(newHand: number): void {
+    this.hand = newHand;
+    this.handCountText.text = newHand.toString();
+  }
+
+  public updateScore(newScore: number): void {
+    this.score = newScore;
+    this.scoreCountText.text = newScore.toString();
+  }
+}
+
+export class Player extends PIXI.Container {
+  private hand: number;
+  private score: number;
+  private faceSprite: PIXI.Sprite | PIXI.Graphics;
+  private statsBoard: StatsBoard;
   private assetsLoader: AssetsLoader;
 
   constructor(name: string, hand: number, score: number) {
@@ -56,72 +118,58 @@ export class Player extends PIXI.Container {
 
   private async initialize(): Promise<void> {
     await this.assetsLoader.load([
-      {alias: 'faceTexture', src: HandSvg},
-      {alias: 'handTexture', src: HandPng},
+      {alias: 'face', src: Face},
+      {alias: 'hand', src: Hand},
+      {alias: 'score', src: Score},
+      {alias: 'boardBg', src: BoardBg},
     ]);
 
     this.createLeftSide();
     this.createRightSide();
   }
 
-  private createLeftSide(): void {
-    // Face
-    this.faceSprite = this.assetsLoader.get('faceTexture');
-    this.faceSprite.width = 50;
-    this.faceSprite.height = 50;
-    this.addChild(this.faceSprite);
+  private createSprite(alias: string, options: Partial<PIXI.Sprite>): PIXI.Sprite {
+    const sprite = this.assetsLoader.get(alias) as PIXI.Sprite;
+    Object.assign(sprite, options);
+    this.addChild(sprite);
+    return sprite;
+  }
 
-    // Name
-    const nameText = new PIXI.Text(this.name, {
-      fontFamily: 'Arial',
-      fontSize: 16,
-      fill: 0xffffff,
+  private createText(text: string, style: Partial<PIXI.TextStyle>, x: number, y: number): PIXI.Text {
+    const textObj = new PIXI.Text(text, {
+      fontFamily: 'jmadh',
+      fontSize: 48,
+      fill: 0x70422f,
+      ...style,
     });
-    nameText.position.set(60, 15);
-    this.addChild(nameText);
+    textObj.position.set(x, y);
+    this.addChild(textObj);
+    return textObj;
+  }
+
+  private createLeftSide(): void {
+    this.faceSprite = this.createSprite('face', {
+      width: 120,
+      height: 120,
+    });
+    this.faceSprite.position.set(0, 10);
+
+    this.createText(this.name, {fontSize: 48}, 15, 120);
   }
 
   private createRightSide(): void {
-    // Hand
-    this.handSprite = this.assetsLoader.get('handTexture') as PIXI.Sprite;
-    this.handSprite.width = 100;
-    this.handSprite.height = 100;
-    this.handSprite.position.set(150, 0);
-    this.addChild(this.handSprite);
-
-    // Hand count
-    this.handCountText = new PIXI.Text(this.hand.toString(), {
-      fontFamily: 'Arial',
-      fontSize: 16,
-      fill: 0xffffff,
-    });
-    this.handCountText.position.set(185, 5);
-    this.addChild(this.handCountText);
-
-    // Score
-    this.scoreSprite = this.assetsLoader.get('faceTexture') as PIXI.Sprite;
-    this.scoreSprite.width = 30;
-    this.scoreSprite.height = 30;
-    this.scoreSprite.position.set(0, 0);
-    this.addChild(this.scoreSprite);
-
-    // Score count
-    this.scoreCountText = new PIXI.Text(this.score.toString(), {
-      fontFamily: 'Arial',
-      fontSize: 16,
-      fill: 0xffffff,
-    });
-    this.scoreCountText.position.set(255, 5);
-    this.addChild(this.scoreCountText);
+    this.statsBoard = new StatsBoard(this.hand, this.score, this.assetsLoader);
+    this.statsBoard.position.set(150, 10);
+    this.addChild(this.statsBoard);
   }
 
   public updateHand(newHand: number): void {
     this.hand = newHand;
-    this.handCountText.text = newHand.toString();
+    this.statsBoard.updateHand(newHand);
   }
 
   public updateScore(newScore: number): void {
     this.score = newScore;
-    this.scoreCountText.text = newScore.toString();
+    this.statsBoard.updateScore(newScore);
   }
 }
