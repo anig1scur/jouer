@@ -5,6 +5,7 @@
     "main": "./src/index.tsx",
     "dependencies": {
         "@pixi/core": "^7.4.2",
+        "@pixi/loaders": "^6.5.10",
         "colyseus.js": "^0.15.26",
         "howler": "^2.2.4",
         "pixi-particles": "^4.3.1",

@@ -1,6 +1,7 @@
 import { Application, Container, Texture, Sprite, Text } from 'pixi.js';
-import { Card, Player, Deck } from './entities';
+import { Card, Deck } from './entities';
 import { Hand } from './entities/Card';
+import { Player  } from './entities/Player';
 import { Models } from '@jouer/common/src';
 import { CardsManager, PlayersManager } from './managers';
 
@@ -122,6 +123,7 @@ export class JouerGame {
     this.playersManager = new PlayersManager();
     this.playersManager.zIndex = ZINDEXES.PLAYERS;
     this.app.stage.addChild(this.playersManager);
+    this.app.stage.addChild(new Player('Player 1', 5, 10));
     // this.playersManager.
     this.onActionSend = onActionSend;
 
