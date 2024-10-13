@@ -106,7 +106,6 @@ export default class Match extends Component<IProps, IState> {
 
       this.client = new Client(url);
       if (isNewRoom) {
-        console.log(options, 'options');
         this.room = await this.client.create(Constants.ROOM_NAME, options);
 
         // We replace the "new" in the URL with the room's id
@@ -132,6 +131,7 @@ export default class Match extends Component<IProps, IState> {
 
     // Listen for state changes
     this.room.state.game.onChange(this.handleGameChange);
+    this.room.state.deck.listen('cards', this.handleGameChange);
     this.room.state.players.onAdd(this.handlePlayerAdd);
     this.room.state.players.onRemove(this.handlePlayerRemove);
 
@@ -143,7 +143,6 @@ export default class Match extends Component<IProps, IState> {
 
     // Listen for inputs
     window.addEventListener('resize', this.handleWindowResize);
-    console.log(this.room.state.players.onAdd)
 
     // Start players refresh listeners
     this.timer = setInterval(this.updateRoom, Constants.PLAYERS_REFRESH);
@@ -168,8 +167,8 @@ export default class Match extends Component<IProps, IState> {
   };
 
   // HANDLERS: Colyseus
-  handleGameChange = (attributes: any) => {
-    console.log(attributes, 'attributes')
+  handleGameChange = (attributes: any, k) => {
+    console.log(attributes, 'attributes',k)
     if(!attributes) {
       return;
     }
@@ -180,7 +179,6 @@ export default class Match extends Component<IProps, IState> {
 
   handlePlayerAdd = (player: any, playerId: string) => {
 
-    console.log('playerAdd', player);
     const isMe = this.isPlayerIdMe(playerId);
     this.game.playerAdd(playerId, player, isMe);
     this.updateRoom();

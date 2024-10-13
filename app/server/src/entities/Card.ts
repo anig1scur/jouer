@@ -5,8 +5,8 @@ export class Card extends Schema {
   @type('string')
   public id: string;
 
-  @type('number')
-  public value: number;
+  @type(['number'])
+  public values: number[];
 
   @type('string')
   public owner: string | null;
@@ -15,17 +15,12 @@ export class Card extends Schema {
   public state: string;
 
   // Init
-  constructor (id: string, value: number) {
+  constructor (id: string, values: number[]) {
     super();
     this.id = id;
-    this.value = value;
+    this.values = values;
     this.owner = null;
     this.state = 'in_deck';
-  }
-
-  getPossibleValues(): number[] {
-    const [v1, v2] = this.id.split('_');
-    return [parseInt(v1), parseInt(v2)];
   }
 
 }

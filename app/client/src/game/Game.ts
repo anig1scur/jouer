@@ -129,13 +129,32 @@ export class JouerGame {
       [3, 1],
     ]);
 
-    hand.position.set(500, 500);
-
+    hand.position.set(window.innerWidth / 2 - 250, window.innerHeight / 2);
     this.app.stage.addChild(hand);
+
     this.playersManager = new PlayersManager();
     this.playersManager.zIndex = ZINDEXES.PLAYERS;
     this.app.stage.addChild(this.playersManager);
-    this.app.stage.addChild(new PlayerSprite('Eunice', 5, 10));
+
+    const eunice = new PlayerSprite('Eunice', 5, 10)
+    const kusa = new PlayerSprite('kusa', 5, 10)
+    const helen = new PlayerSprite('Helen', 5, 10)
+    const huan = new PlayerSprite('huan', 5, 10)
+
+    eunice.scale.set(0.5);
+    kusa.scale.set(0.5);
+    helen.scale.set(0.5);
+    huan.scale.set(0.5);
+
+    eunice.position.set(100, 60);
+    kusa.position.set(100, 160);
+    helen.position.set(100, 260);
+    huan.position.set(100, 360);
+
+    this.app.stage.addChild(eunice);
+    this.app.stage.addChild(kusa);
+    this.app.stage.addChild(helen);
+    this.app.stage.addChild(huan);
 
     this.onActionSend = onActionSend;
   }

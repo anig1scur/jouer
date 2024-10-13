@@ -1,9 +1,8 @@
-import { Schema, type, MapSchema, ArraySchema } from '@colyseus/schema';
-import { Player, Card, Deck, Table, Game } from '../entities';
-import { Constants, Types, Models } from '@jouer/common';
+import {Schema, type, MapSchema, ArraySchema} from '@colyseus/schema';
+import {Player, Card, Deck, Table, Game} from '../entities';
+import {Constants, Types, Models} from '@jouer/common';
 
 export class GameState extends Schema {
-
   @type(Game)
   public game: Game;
 
@@ -16,7 +15,7 @@ export class GameState extends Schema {
   @type('string')
   public state: 'waiting' | 'playing' | 'finished' = 'waiting';
 
-  @type({ map: Player })
+  @type({map: Player})
   public players: MapSchema<Player> = new MapSchema<Player>();
 
   @type(Deck)
@@ -29,11 +28,7 @@ export class GameState extends Schema {
 
   private onMessage: (message: Models.MessageJSON) => void;
 
-  constructor (
-    roomName: string,
-    maxPlayers: number,
-    onMessage: (message: Models.MessageJSON) => void,
-  ) {
+  constructor(roomName: string, maxPlayers: number, onMessage: (message: Models.MessageJSON) => void) {
     super();
 
     this.roomName = roomName;
@@ -68,11 +63,11 @@ export class GameState extends Schema {
 
   startGame() {
     if (this.players.size < 2) {
-      throw new Error("Not enough players to start the game");
+      throw new Error('Not enough players to start the game');
     }
 
     this.state = 'playing';
-    this.dealInitialCards();
+    this.initCards();
 
     this.onMessage({
       type: 'start',
@@ -86,10 +81,7 @@ export class GameState extends Schema {
     return this.players.size;
   }
 
-
-
   getPlayerHandSize(): number {
-
     if (this.playerCount === 3) {
       return 45 / 3;
     } else if (this.playerCount === 4) {
@@ -100,17 +92,20 @@ export class GameState extends Schema {
     return 0;
   }
 
-  private dealInitialCards() {
-    for (let i = 0;i < this.getPlayerHandSize();i++) {
-      this.players.forEach(player => {
+  private initCards() {
+    this.deck.playerCount = this.playerCount;
+    this.deck.generateCards();
+
+    this.players.forEach((player) => {
+      for (let i = 0; i < this.getPlayerHandSize(); i++) {
         player.addCard(this.deck.randomDraw());
-      });
-    }
+      }
+    });
   }
 
   playerAdd(id: string, name: string) {
     if (this.players.size >= this.maxPlayers) {
-      throw new Error("Maximum number of players reached");
+      throw new Error('Maximum number of players reached');
     }
 
     const player = new Player(id, name);
@@ -121,13 +116,12 @@ export class GameState extends Schema {
       type: 'joined',
       from: 'server',
       ts: Date.now(),
-      params: { name: name },
+      params: {name: name},
     });
 
     if (this.players.size === this.maxPlayers) {
       this.startGame();
     }
-    // this.players.onAdd
   }
 
   playerRemove(id: string) {
@@ -137,12 +131,11 @@ export class GameState extends Schema {
         type: 'left',
         from: 'server',
         ts: Date.now(),
-        params: { name: player.name },
+        params: {name: player.name},
       });
       this.players.delete(id);
     }
   }
-
 
   playCards(playerId: string, cards: Card[]) {
     const player = this.players.get(playerId);
@@ -155,7 +148,7 @@ export class GameState extends Schema {
       this.table.addCards(cards);
       this.nextTurn();
     } else {
-      throw new Error("Invalid play");
+      throw new Error('Invalid play');
     }
   }
 
@@ -170,7 +163,7 @@ export class GameState extends Schema {
       this.getCurrentPlayer().incrementBorrowedCount();
       this.nextTurn();
     } else {
-      throw new Error("Cannot borrow this card");
+      throw new Error('Cannot borrow this card');
     }
   }
 
@@ -178,13 +171,6 @@ export class GameState extends Schema {
     this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.size;
     const nextPlayer = this.getCurrentPlayer();
     nextPlayer.isMyTurn = true;
-
-    // this.onMessage({
-    //   type: ''
-    //   from: 'server',
-    //   ts: Date.now(),
-    //   params: { playerId: nextPlayer.id },
-    // });
   }
 
   private getCurrentPlayer(): Player {
@@ -197,7 +183,7 @@ export class GameState extends Schema {
       type: 'stop',
       from: 'server',
       ts: Date.now(),
-      params: { winnerId: winner.id, winnerName: winner.name },
+      params: {winnerId: winner.id, winnerName: winner.name},
     });
   }
 
@@ -210,8 +196,7 @@ export class GameState extends Schema {
     });
   };
 
-  private handleLobbyStart = () => {
-  };
+  private handleLobbyStart = () => {};
 
   private handleGameStart = () => {
     this.onMessage({
@@ -234,5 +219,4 @@ export class GameState extends Schema {
       params: {},
     });
   };
-
 }

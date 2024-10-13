@@ -54,14 +54,16 @@ class StatsBoard extends PIXI.Container {
     return sprite;
   }
 
-  private createText(text: string, style: Partial<PIXI.TextStyle>, x: number, y: number): PIXI.Text {
-    const textObj = new PIXI.Text(text, {
-      fontFamily: 'jmadh',
-      fontSize: 48,
-      fill: 0x70422f,
-      ...style,
+  private createText(text: string, style: Partial<PIXI.TextStyle>): PIXI.Text {
+    const textObj = new PIXI.Text({
+      text,
+      style: {
+        fontFamily: 'jmadh',
+        fontSize: 48,
+        fill: 0x70422f,
+        ...style,
+      },
     });
-    textObj.position.set(x, y);
     this.addChild(textObj);
     return textObj;
   }
@@ -79,12 +81,14 @@ class StatsBoard extends PIXI.Container {
     this.handSprite = this.createSprite('hand', commonSpriteOptions);
     this.handSprite.position.set(20, 10);
 
-    this.handCountText = this.createText(this.hand.toString(), commonTextStyle, 80, 0);
+    this.handCountText = this.createText(this.hand.toString(), commonTextStyle);
+    this.handCountText.position.set(80, 0);
 
     this.scoreSprite = this.createSprite('score', commonSpriteOptions);
     this.scoreSprite.position.set(20, 85);
 
-    this.scoreCountText = this.createText(this.score.toString(), commonTextStyle, 80, 80);
+    this.scoreCountText = this.createText(this.score.toString(), commonTextStyle);
+    this.scoreCountText.position.set(80, 80);
   }
 
   public updateHand(newHand: number): void {
@@ -135,26 +139,33 @@ export class Player extends PIXI.Container {
     return sprite;
   }
 
-  private createText(text: string, style: Partial<PIXI.TextStyle>, x: number, y: number): PIXI.Text {
-    const textObj = new PIXI.Text(text, {
-      fontFamily: 'jmadh',
-      fontSize: 48,
-      fill: 0x70422f,
-      ...style,
+  private createText(text: string, style: Partial<PIXI.TextStyle>): PIXI.Text {
+    const textObj = new PIXI.Text({
+      text,
+      style: {
+        fontFamily: 'jmadh',
+        fontSize: 48,
+        fill: 0x70422f,
+        ...style,
+      },
     });
-    textObj.position.set(x, y);
     this.addChild(textObj);
     return textObj;
   }
 
   private createLeftSide(): void {
+    const faceWidth = 120;
     this.faceSprite = this.createSprite('face', {
-      width: 120,
+      width: faceWidth,
       height: 120,
     });
     this.faceSprite.position.set(0, 10);
 
-    this.createText(this.name, {fontSize: 48}, 15, 120);
+    const nameText = this.createText(this.name, {fontSize: 48});
+    const nameTextWidth = nameText.width;
+
+    nameText.position.x = (faceWidth - nameTextWidth) / 2;
+    nameText.position.y = 120;
   }
 
   private createRightSide(): void {

@@ -1,10 +1,9 @@
-import { Schema, type } from '@colyseus/schema';
-import { Card } from './Card';
-
+import {Schema, type} from '@colyseus/schema';
+import {Card} from './Card';
 
 export class Deck extends Schema {
-  // cards: Card[];
-  // discards: Card[];
+  @type('number')
+  public playerCount: number = 0;
 
   @type([Card])
   public cards: Card[];
@@ -12,8 +11,7 @@ export class Deck extends Schema {
   @type([Card])
   public discards: Card[];
 
-
-  constructor () {
+  constructor() {
     super();
     this.cards = [];
     this.discards = [];
@@ -23,21 +21,23 @@ export class Deck extends Schema {
     this.generateCards(true);
   }
 
-  generateCards(shuffle: boolean): void {
+  generateCards(shuffle?: boolean): void {
     this.cards = [];
-    for (let i = 1;i <= 10;i++) {
-      for (let j = i + 1;j <= 10;j++) {
-        this.cards.push(new Card(`${ i }-${ j }`, i));
-        this.cards.push(new Card(`${ j }-${ i }`, j));
+    let iStart = this.playerCount === 2 ? 9 : 10;
+
+    for (let i = iStart; i >= 2; i--) {
+      for (let j = i - 1; j >= 1; j--) {
+        this.cards.push(new Card(`${i}-${j}`, [i, j]));
       }
     }
+
     if (shuffle) {
       this.shuffleCards();
     }
   }
 
   shuffleCards(): void {
-    for (let i = this.cards.length - 1;i > 0;i--) {
+    for (let i = this.cards.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
     }
@@ -45,24 +45,23 @@ export class Deck extends Schema {
 
   randomDraw(): Card {
     if (this.cards.length === 0) {
-      throw new Error("No more cards in the deck");
+      throw new Error('No more cards in the deck');
     }
     return this.cards.pop()!;
   }
 
   drawCard(card: Card): void {
-    const index = this.cards.findIndex(c => c.id === card.id);
+    const index = this.cards.findIndex((c) => c.id === card.id);
     if (index !== -1) {
       this.cards.splice(index, 1);
     }
   }
 
-
   isSequence(cards: Card[]): boolean {
-    const cardValues = cards.map(card => card.value);
+    const cardValues = cards.map((card) => card.value);
 
-    for (let i = 1;i < cardValues.length;i++) {
-      if ((cardValues[i] !== cardValues[i - 1] + 1) || cardValues[i] !== cardValues[i - 1] + 1) {
+    for (let i = 1; i < cardValues.length; i++) {
+      if (cardValues[i] !== cardValues[i - 1] + 1 || cardValues[i] !== cardValues[i - 1] + 1) {
         return false;
       }
     }
@@ -92,7 +91,7 @@ export class Deck extends Schema {
 
   getCardsType(cards: Card[]): string {
     if (cards.length === 1) return 'single';
-    if (cards.every(card => card.value === cards[0].value)) return 'same';
+    if (cards.every((card) => card.value === cards[0].value)) return 'same';
     if (this.isSequence(cards)) return 'sequence';
 
     return 'invalid';

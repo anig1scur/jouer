@@ -17,17 +17,22 @@ export class Card extends PIXI.Graphics {
   private padding: number = 15;
   private triangleRadius: number = 10;
   private triangleRatio: number = 4 / 3;
-  private selected: boolean = false; // 记录是否被选中
+  private selected: boolean = false;
+  private cardIndex: number;
+  private onSelectCallback: (index: number, selected: boolean) => void;
 
   constructor(
+    cardIndex: number,
     topNumber: number,
     topColor: number,
     bottomNumber: number,
     bottomColor: number,
+    onSelectCallback: (index: number, selected: boolean) => void,
     width: number = 120,
     height: number = 180
   ) {
     super();
+    this.cardIndex = cardIndex;
     this.cardWidth = width;
     this.cardHeight = height;
     this.width = width;
@@ -36,6 +41,7 @@ export class Card extends PIXI.Graphics {
     this.topColor = topColor;
     this.bottomNumber = bottomNumber;
     this.bottomColor = bottomColor;
+    this.onSelectCallback = onSelectCallback;
 
     this.drawCard();
     this.eventMode = 'dynamic';
@@ -43,15 +49,17 @@ export class Card extends PIXI.Graphics {
     this.on('pointerdown', this.toggleSelect);
   }
 
-  private onHover = (): void => {
-    console.log('hover');
-  };
-
   private toggleSelect = (): void => {
-    console.log('toggle select');
     this.selected = !this.selected;
     this.y = this.selected ? this.y - 20 : this.y + 20;
+
+    this.onSelectCallback(this.cardIndex, this.selected);
   };
+
+  public setSelected(selected: boolean): void {
+    this.selected = selected;
+    this.y = this.selected ? this.y - 20 : this.y + 20;
+  }
 
   private drawCard(): void {
     this.drawBackground();
@@ -90,7 +98,6 @@ export class Card extends PIXI.Graphics {
     // topTriangle.stroke();
 
     topTriangle.fill();
-
     topTriangle.stroke();
 
     const topText = new Text({
@@ -152,16 +159,24 @@ export class Card extends PIXI.Graphics {
 
 export class Hand extends PIXI.Container {
   private cards: handCard[];
-  private activeCards: handCard[] = [];
+  private selectedCards: number[] = [];
   private cardWidth: 80;
   private cardHeight: 120;
-  private padding: number = 10;
 
   constructor(cards: handCard[]) {
     super();
     this.cards = cards;
     this.drawHand();
   }
+
+  private onCardSelect = (index: number, selected: boolean): void => {
+    if (selected) {
+      this.selectedCards.push(index);
+    } else {
+      this.selectedCards = this.selectedCards.filter((i) => i !== index);
+    }
+    console.log(this.selectedCards);
+  };
 
   drawHand(): void {
     this.removeChildren();
@@ -172,13 +187,27 @@ export class Hand extends PIXI.Container {
       const angleStep = totalAngle / totalCards;
       const angle = -totalAngle / 2 + index * angleStep;
 
-      const cardSprite = new Card(card[0], 0xffe6bd, card[1], 0xe2976f, this.cardWidth, this.cardHeight);
+      const cardSprite = new Card(
+        index,
+        card[0],
+        0xffe6bd,
+        card[1],
+        0xe2976f,
+        this.onCardSelect,
+        this.cardWidth,
+        this.cardHeight
+      );
       cardSprite.rotation = angle;
       cardSprite.position.set(index * 80, Math.abs(angle) * 100);
 
       this.addChild(cardSprite);
     });
     this.position.set(100, 100);
+  }
+
+  public getSelectedCards(): handCard[] {
+    // 根据选中的索引返回选中的卡牌
+    return this.selectedCards.map((index) => this.cards[index]);
   }
 
   public addCard(card: handCard): void {
