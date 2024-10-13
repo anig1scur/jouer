@@ -1,10 +1,10 @@
 import * as PIXI from 'pixi.js';
-import { colorShade } from '../../utils/color';
-import { Text } from 'pixi.js';
+import {colorShade} from '../../utils/color';
+import {Text} from 'pixi.js';
 
 type handCard = number[];
 
-const CARD_BG = "#FFEDD7";
+const CARD_BG = '#FFEDD7';
 const BORDER_COLOR = '#A06C30';
 
 export class Card extends PIXI.Graphics {
@@ -19,7 +19,14 @@ export class Card extends PIXI.Graphics {
   private triangleRatio: number = 4 / 3;
   private selected: boolean = false; // 记录是否被选中
 
-  constructor (topNumber: number, topColor: number, bottomNumber: number, bottomColor: number, width: number = 120, height: number = 180) {
+  constructor(
+    topNumber: number,
+    topColor: number,
+    bottomNumber: number,
+    bottomColor: number,
+    width: number = 120,
+    height: number = 180
+  ) {
     super();
     this.cardWidth = width;
     this.cardHeight = height;
@@ -31,29 +38,26 @@ export class Card extends PIXI.Graphics {
     this.bottomColor = bottomColor;
 
     this.drawCard();
-    this.interactive = true;
+    this.eventMode = 'dynamic';
+    this.cursor = 'pointer';
+    this.on('pointerdown', this.toggleSelect);
   }
 
   private onHover = (): void => {
     console.log('hover');
-    this.y = this.selected ? this.y - 20 : this.y + 20;
-  }
+  };
 
-  // 切换选择状态
   private toggleSelect = (): void => {
     console.log('toggle select');
     this.selected = !this.selected;
-    this.y = this.selected ? this.y - 20 : this.y + 20; // 根据选择状态调整高度
-    console.log(`Card selected: ${this.selected}`);  // 输出选择状态
-
-  }
+    this.y = this.selected ? this.y - 20 : this.y + 20;
+  };
 
   private drawCard(): void {
     this.drawBackground();
     this.drawTopTriangle();
     this.drawBottomTriangle();
     this.hitArea = new PIXI.Rectangle(0, 0, this.cardWidth, this.cardHeight);
-
   }
 
   private drawBackground(): void {
@@ -67,9 +71,6 @@ export class Card extends PIXI.Graphics {
       width: 2,
     });
     background.stroke();
-        // 
-        background.on('pointertap', this.toggleSelect);
-        background.on('pointerover', this.onHover);
     this.addChild(background);
   }
 
@@ -77,7 +78,7 @@ export class Card extends PIXI.Graphics {
     const topTriangle = new PIXI.Graphics().setStrokeStyle({
       color: colorShade(this.topColor.toString(16), -50),
       width: 2,
-    })
+    });
     topTriangle.fill(this.topColor);
 
     topTriangle.moveTo(this.padding, this.padding);
@@ -117,7 +118,7 @@ export class Card extends PIXI.Graphics {
     const bottomTriangle = new PIXI.Graphics().setStrokeStyle({
       color: colorShade(this.bottomColor.toString(16), -50),
       width: 2,
-    })
+    });
     bottomTriangle.fill(this.bottomColor);
     bottomTriangle.moveTo(this.cardWidth - this.padding, this.cardHeight - this.padding);
     bottomTriangle.lineTo(this.cardWidth - this.cardWidth / this.triangleRatio, this.cardHeight - this.padding);
@@ -134,10 +135,10 @@ export class Card extends PIXI.Graphics {
         align: 'center',
         fill: 'white',
         stroke: {
-          color: "#A06C30",
+          color: '#A06C30',
           width: 2,
-        }
-      }
+        },
+      },
     });
 
     // bottomText rotate by center
@@ -147,8 +148,6 @@ export class Card extends PIXI.Graphics {
     bottomTriangle.addChild(bottomText);
     this.addChild(bottomTriangle);
   }
-
-
 }
 
 export class Hand extends PIXI.Container {
@@ -158,7 +157,7 @@ export class Hand extends PIXI.Container {
   private cardHeight: 120;
   private padding: number = 10;
 
-  constructor (cards: handCard[]) {
+  constructor(cards: handCard[]) {
     super();
     this.cards = cards;
     this.drawHand();
@@ -173,13 +172,9 @@ export class Hand extends PIXI.Container {
       const angleStep = totalAngle / totalCards;
       const angle = -totalAngle / 2 + index * angleStep;
 
-      const cardSprite = new Card(card[0], 0xFFE6BD, card[1], 0xE2976F, this.cardWidth, this.cardHeight);
-
+      const cardSprite = new Card(card[0], 0xffe6bd, card[1], 0xe2976f, this.cardWidth, this.cardHeight);
       cardSprite.rotation = angle;
-      cardSprite.position.set(
-        index * 80,
-        Math.abs(angle) * 100
-      );
+      cardSprite.position.set(index * 80, Math.abs(angle) * 100);
 
       this.addChild(cardSprite);
     });

@@ -1,7 +1,7 @@
 import {Application, Container, Texture, Sprite, Text} from 'pixi.js';
-import {Card, Deck} from './entities';
+import {Card, Deck, Player} from './entities';
 import {Hand} from './entities/Card';
-import {Player} from './entities/Player';
+import {Player as PlayerSprite} from './entities/Player';
 import {Models} from '@jouer/common/src';
 import {CardsManager, PlayersManager} from './managers';
 
@@ -117,7 +117,6 @@ export class JouerGame {
     this.cardsManager.zIndex = ZINDEXES.CARDS;
     this.app.stage.addChild(this.cardsManager);
 
-    // this.app.stage.addChild(new C(5, 0xFFC0CB, 8, 0xC0C0C0, 150, 200));
     const hand = new Hand([
       [5, 8],
       [7, 9],
@@ -129,13 +128,15 @@ export class JouerGame {
       [8, 3],
       [3, 1],
     ]);
+
     hand.position.set(500, 500);
+
     this.app.stage.addChild(hand);
     this.playersManager = new PlayersManager();
     this.playersManager.zIndex = ZINDEXES.PLAYERS;
     this.app.stage.addChild(this.playersManager);
-    this.app.stage.addChild(new Player('Eunice', 5, 10));
-    // this.playersManager.
+    this.app.stage.addChild(new PlayerSprite('Eunice', 5, 10));
+
     this.onActionSend = onActionSend;
   }
 
@@ -259,10 +260,10 @@ export class JouerGame {
   playerAdd = (playerId: string, attributes: Models.PlayerJSON, isMe: boolean) => {
     const player = new Player(
       {
-        x: 12,
-        y: 12,
-        radius: 10,
+        x: 0,
+        y: 0,
         zIndex: ZINDEXES.PLAYERS,
+        radius: 10,
         textures: [],
       },
       playerId,

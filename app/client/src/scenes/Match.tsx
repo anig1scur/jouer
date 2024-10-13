@@ -170,6 +170,9 @@ export default class Match extends Component<IProps, IState> {
   // HANDLERS: Colyseus
   handleGameChange = (attributes: any) => {
     console.log(attributes, 'attributes')
+    if(!attributes) {
+      return;
+    }
     for (const row of attributes) {
       this.game.gameUpdate(row.field, row.value);
     }
