@@ -65,8 +65,10 @@ export class JouerGame {
   constructor (screenWidth: number, screenHeight: number, onActionSend: any) {
     this.app = app;
     this.app.init({
+      backgroundAlpha: 0,
       width: screenWidth,
       height: screenHeight,
+      resizeTo: window,
       autoDensity: true,
       antialias: true,
       resolution: 2
@@ -119,7 +121,7 @@ export class JouerGame {
     this.app.stage.addChild(this.cardsManager);
 
     // this.app.stage.addChild(new C(5, 0xFFC0CB, 8, 0xC0C0C0, 150, 200));
-    this.app.stage.addChild(new Hand([[5, 8], [7, 9], [2, 1], [8, 3], [3, 1]]));
+    this.app.stage.addChild(new Hand([[5, 8], [7, 9], [5, 8], [7, 9],[5, 8], [7, 9],[2, 1], [8, 3], [3, 1]]));
     this.playersManager = new PlayersManager();
     this.playersManager.zIndex = ZINDEXES.PLAYERS;
     this.app.stage.addChild(this.playersManager);

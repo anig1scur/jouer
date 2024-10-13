@@ -1,9 +1,12 @@
-@import url('https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap');
+@font-face {
+  font-family: Kreon;
+  src: url(./assets/fonts/Kreon-Regular.ttf);
+}
 
 html,
 body {
   height: 100%;
-  font-family: 'Press Start 2P';
+  font-family: 'Kreon';
 }
 
 body {
@@ -19,7 +22,7 @@ input,
 select,
 button {
   margin: 0;
-  font-family: 'Press Start 2P';
+  font-family: 'Kreon';
 }
 
 a {

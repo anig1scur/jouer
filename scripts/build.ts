@@ -28,6 +28,7 @@ export async function buildClient() {
       '.ogg': 'file',
       '.svg': 'file',
       '.ico': 'file',
+      '.ttf': 'file',
     },
     bundle: true,
     minify: BUILD_MODE === 'production',

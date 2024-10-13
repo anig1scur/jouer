@@ -1,9 +1,13 @@
 import * as PIXI from 'pixi.js';
 import { colorShade } from '../../utils/color';
+import { Text } from 'pixi.js';
 
 type handCard = number[];
 
-export class Card extends PIXI.Container {
+const CARD_BG = "#FFEDD7";
+const BORDER_COLOR = '#A06C30';
+
+export class Card extends PIXI.Graphics {
   private cardWidth: number;
   private cardHeight: number;
   private topNumber: number;
@@ -13,6 +17,7 @@ export class Card extends PIXI.Container {
   private padding: number = 15;
   private triangleRadius: number = 10;
   private triangleRatio: number = 4 / 3;
+  private selected: boolean = false; // 记录是否被选中
 
   constructor (topNumber: number, topColor: number, bottomNumber: number, bottomColor: number, width: number = 120, height: number = 180) {
     super();
@@ -26,19 +31,45 @@ export class Card extends PIXI.Container {
     this.bottomColor = bottomColor;
 
     this.drawCard();
+    this.interactive = true;
+  }
+
+  private onHover = (): void => {
+    console.log('hover');
+    this.y = this.selected ? this.y - 20 : this.y + 20;
+  }
+
+  // 切换选择状态
+  private toggleSelect = (): void => {
+    console.log('toggle select');
+    this.selected = !this.selected;
+    this.y = this.selected ? this.y - 20 : this.y + 20; // 根据选择状态调整高度
+    console.log(`Card selected: ${this.selected}`);  // 输出选择状态
+
   }
 
   private drawCard(): void {
     this.drawBackground();
     this.drawTopTriangle();
     this.drawBottomTriangle();
+    this.hitArea = new PIXI.Rectangle(0, 0, this.cardWidth, this.cardHeight);
+
   }
 
   private drawBackground(): void {
     const background = new PIXI.Graphics();
-    background.fill(0xFFFFFF);
-    background.drawRoundedRect(0, 0, this.cardWidth, this.cardHeight, 10);
+    background.fill(CARD_BG);
+    background.roundRect(0, 0, this.cardWidth, this.cardHeight, 10);
     background.fill();
+
+    background.setStrokeStyle({
+      color: BORDER_COLOR,
+      width: 2,
+    });
+    background.stroke();
+        // 
+        background.on('pointertap', this.toggleSelect);
+        background.on('pointerover', this.onHover);
     this.addChild(background);
   }
 
@@ -61,12 +92,21 @@ export class Card extends PIXI.Container {
 
     topTriangle.stroke();
 
-    const topText = new PIXI.Text(this.topNumber.toString(), {
-      fontSize: 32,
-      fill: 0xFFFFFF,
-      align: 'center'
+    const topText = new Text({
+      text: this.topNumber.toString(),
+      style: {
+        fontFamily: 'Kreon',
+        fontSize: 48,
+        align: 'center',
+        fill: 'rgba(0, 0, 0, 0)',
+        stroke: {
+          color: BORDER_COLOR,
+          width: 2,
+        },
+      },
     });
-    topText.position.set(30, 30);
+
+    topText.position.set(25, 20);
 
     topTriangle.addChild(topText);
 
@@ -86,45 +126,34 @@ export class Card extends PIXI.Container {
     bottomTriangle.fill();
     bottomTriangle.stroke();
 
-    const bottomText = new PIXI.Text(this.bottomNumber.toString(), {
-      fontFamily: 'Arial',
-      fontSize: 32,
-      fill: 0xFFFFFF,
-      align: 'center'
+    const bottomText = new PIXI.Text({
+      text: this.bottomNumber.toString(),
+      style: {
+        fontFamily: 'Kreon',
+        fontSize: 48,
+        align: 'center',
+        fill: 'white',
+        stroke: {
+          color: "#A06C30",
+          width: 2,
+        }
+      }
     });
+
+    // bottomText rotate by center
+    bottomText.anchor.set(1);
+    bottomText.rotation = Math.PI;
     bottomText.position.set(this.cardWidth / 2 + this.padding, this.cardHeight / 2 + this.padding);
     bottomTriangle.addChild(bottomText);
     this.addChild(bottomTriangle);
   }
 
 
-  public setTopNumber(number: number): void {
-    this.topNumber = number;
-    this.removeChildren();
-    this.drawCard();
-  }
-
-  public setBottomNumber(number: number): void {
-    this.bottomNumber = number;
-    this.removeChildren();
-    this.drawCard();
-  }
-
-  public setTopColor(color: number): void {
-    this.topColor = color;
-    this.removeChildren();
-    this.drawCard();
-  }
-
-  public setBottomColor(color: number): void {
-    this.bottomColor = color;
-    this.removeChildren();
-    this.drawCard();
-  }
 }
 
 export class Hand extends PIXI.Container {
   private cards: handCard[];
+  private activeCards: handCard[] = [];
   private cardWidth: 80;
   private cardHeight: 120;
   private padding: number = 10;
@@ -137,10 +166,21 @@ export class Hand extends PIXI.Container {
 
   drawHand(): void {
     this.removeChildren();
-    const cardLen = this.cards.length;
+    const totalCards = this.cards.length;
+    const totalAngle = Math.PI / 6;
+
     this.cards.forEach((card, index) => {
-      const cardSprite = new Card(card[0], 0xFFC0CB, card[1], 0xC0C0C0, this.cardWidth, this.cardHeight);
-      cardSprite.position.set(index * 100, Math.abs((index + 1) - cardLen / 2) * 8);
+      const angleStep = totalAngle / totalCards;
+      const angle = -totalAngle / 2 + index * angleStep;
+
+      const cardSprite = new Card(card[0], 0xFFE6BD, card[1], 0xE2976F, this.cardWidth, this.cardHeight);
+
+      cardSprite.rotation = angle;
+      cardSprite.position.set(
+        index * 80,
+        Math.abs(angle) * 100
+      );
+
       this.addChild(cardSprite);
     });
     this.position.set(100, 100);
@@ -153,11 +193,6 @@ export class Hand extends PIXI.Container {
 
   public removeCard(index: number): void {
     this.cards.splice(index, 1);
-    this.drawHand();
-  }
-
-  public reverse(): void {
-    this.cards.reverse();
     this.drawHand();
   }
 }
