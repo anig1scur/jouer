@@ -1,6 +1,6 @@
 import { AnimatedSprite, Container, Graphics, Texture } from 'pixi.js';
 
-import { Constants } from '@jouer/common';
+import { Constants, Models } from '@jouer/common';
 import { TextSprite } from "../sprites";
 export interface BaseProps {
   x: number;
@@ -81,11 +81,10 @@ export class Player extends BaseEntity {
   public id: string;
   public name: string;
   private hand: Card[] = [];
-  private eaten: Card[] = [];
   public score: number = 0;
-  public borrowedCount: number = 0;
   public jouerCount: number = 0;
-  public isMyTurn: boolean = false;
+  public cardCount: number = 0;
+  public status: Models.PlayerStatus = Models.PlayerStatus.default;
 
   constructor (props: BaseProps, id: string, name: string) {
     super(props);

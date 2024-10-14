@@ -1,4 +1,4 @@
-export type GameState = 'waiting' | 'lobby' | 'game';
+export type GameState = 'waiting' | 'playing' | 'awarding';
 
 /**
  * Represent the initial parameters of a Player
@@ -16,4 +16,3 @@ export interface IRoomOptions {
   roomMaxPlayers: number;
   mode: string;
 }
-

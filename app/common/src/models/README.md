@@ -57,13 +57,13 @@ compareTwoCardList: (cards1: Card[], cards2: Card[]) => number
 id: string
 name: string
 hand: Card[]
-eaten: Card[]
+<!-- eaten: Card[] -->
 
 score: number
-borrowedCount: number
+<!-- borrowedCount: number -->
 jouerCount: number // borrow and play count
 
-isMyTurn: boolean
+<!-- isMyTurn: boolean -->
 
 playCards: (cards: Card[]) => void
 borrowCard: (card: Card) => void

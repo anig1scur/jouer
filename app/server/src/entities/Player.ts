@@ -1,44 +1,43 @@
-import { Schema, type } from '@colyseus/schema';
-import { Card } from './Card';
-
+import {Client} from 'colyseus';
+import {filter, Schema, ArraySchema, type} from '@colyseus/schema';
+import {Card} from './Card';
+import {Models} from '@jouer/common';
 
 export class Player extends Schema {
-
   @type('string')
   public id: string;
 
   @type('string')
   public name: string;
 
+  @filter(function (this: Player, client: Client, value: ArraySchema<Card>) {
+    // console.log("Player's session ID:", client.sessionId, "Player's ID:", this.id)
+    return client.sessionId === this.id;
+  })
   @type([Card])
-  public hand: Card[];
-
-  @type([Card])
-  public eaten: Card[];
+  public hand: ArraySchema<Card> = new ArraySchema<Card>();
 
   @type('number')
   public score: number;
 
   @type('number')
-  public borrowedCount: number;
+  public cardCount: number;
 
   @type('number')
   public jouerCount: number;
 
-  @type('boolean')
-  public isMyTurn: boolean;
+  @type('string')
+  public status: Models.PlayerStatus;
 
   // Init
-  constructor (id: string, name: string) {
+  constructor(id: string, name: string) {
     super();
     this.id = id;
     this.name = name;
-    this.hand = [];
-    this.eaten = [];
+    this.hand = new ArraySchema<Card>();
     this.score = 0;
-    this.borrowedCount = 0;
+    this.cardCount = 0;
     this.jouerCount = 0;
-    this.isMyTurn = false;
   }
 
   addCard(card: Card): void {
@@ -46,8 +45,8 @@ export class Player extends Schema {
   }
 
   playCards(cards: Card[]): void {
-    cards.forEach(card => {
-      const index = this.hand.findIndex(c => c.id === card.id);
+    cards.forEach((card) => {
+      const index = this.hand.findIndex((c) => c.id === card.id);
       if (index !== -1) {
         this.hand.splice(index, 1);
       }
@@ -60,11 +59,10 @@ export class Player extends Schema {
   }
 
   eatCards(cards: Card[]): void {
-    this.eaten.push(...cards);
-    this.score += cards.length;
+    // this.score += cards.length;
   }
 
   incrementBorrowedCount(): void {
-    this.borrowedCount++;
+    // this.borrowedCount++;
   }
 }

@@ -1,6 +1,6 @@
-import { Constants, Models, Types } from '@jouer/common';
-import { MapSchema, Schema, type } from '@colyseus/schema';
-import { Player } from './Player';
+import {Constants, Models, Types} from '@jouer/common';
+import {MapSchema, Schema, type} from '@colyseus/schema';
+import {Player} from './Player';
 
 export interface IGame {
   roomName: string;
@@ -14,7 +14,7 @@ export interface IGame {
 
 export class Game extends Schema {
   @type('string')
-  public state: Types.GameState = 'lobby';
+  public state: Types.GameState = 'waiting';
 
   @type('string')
   public roomName: string;
@@ -41,7 +41,7 @@ export class Game extends Schema {
   private onGameEnd: (message?: Models.MessageJSON) => void;
 
   // Init
-  constructor (attributes: IGame) {
+  constructor(attributes: IGame) {
     super();
     this.roomName = attributes.roomName;
     this.maxPlayers = attributes.maxPlayers;
@@ -58,10 +58,10 @@ export class Game extends Schema {
       case 'waiting':
         this.updateWaiting(players);
         break;
-      case 'lobby':
+      case 'waiting':
         this.updateLobby(players);
         break;
-      case 'game':
+      case 'playing':
         this.updateGame(players);
         break;
       default:
@@ -126,7 +126,6 @@ export class Game extends Schema {
         return;
       }
     }
-
   }
 
   // Start
@@ -140,14 +139,12 @@ export class Game extends Schema {
   startLobby() {
     this.lobbyEndsAt = Date.now() + Constants.LOBBY_DURATION;
     this.gameEndsAt = undefined;
-    this.state = 'lobby';
     this.onLobbyStart();
   }
 
   startGame() {
     this.lobbyEndsAt = undefined;
     this.gameEndsAt = Date.now() + Constants.GAME_DURATION;
-    this.state = 'game';
     this.onGameStart();
   }
 }
@@ -168,7 +165,7 @@ function getWinningPlayer(players: MapSchema<Player>): Player | null {
     if (!winningPlayer || player.score > winningPlayer.score) {
       winningPlayer = player;
     }
-  })
+  });
 
   return winningPlayer;
 }

@@ -26,7 +26,6 @@
         "@types/cors": "^2.8.17",
         "@types/howler": "^2.2.12",
         "@types/node": "^22.7.5",
-        "@types/pixi.js": "^5.0.0",
         "@types/querystringify": "^2.0.2",
         "@types/rbush": "^4.0.0",
         "concurrently": "^9.0.1",

@@ -1,20 +1,17 @@
-import { Schema, type } from '@colyseus/schema';
-import { Player } from './Player';
-import { Deck } from './Deck';
-import { Card } from './Card';
-
+import {Schema, type} from '@colyseus/schema';
+import {Player} from './Player';
+import {Card} from './Card';
 
 export class Table extends Schema {
-
   @type([Card])
   public cards: Card[];
 
-  constructor () {
-    super()
+  constructor() {
+    super();
   }
 
   canPlayCards(cards: Card[]) {
-    return true
+    return true;
   }
 
   addCards(cards: Card[]) {
@@ -22,6 +19,6 @@ export class Table extends Schema {
   }
 
   borrowCard(player: Player, cardId: string): Card {
-
+    return new Card('0-0', [0, 0]);
   }
 }

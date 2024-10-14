@@ -1,28 +1,3 @@
-
-// @type('string')
-// public id: string;
-
-// @type('string')
-// public name: string;
-
-// @type([Card])
-// public hand: Card[];
-
-// @type([Card])
-// public eaten: Card[];
-
-// @type('number')
-// public score: number;
-
-// @type('number')
-// public borrowedCount: number;
-
-// @type('number')
-// public jouerCount: number;
-
-// @type('boolean')
-// public isMyTurn: boolean;
-
 export interface CardJSON {
   id: string;
   value: number;
@@ -30,13 +5,29 @@ export interface CardJSON {
   state: string;
 }
 
+export enum PlayerStatus {
+  default = 'default',
+  thinking = 'thinking',
+  laughing = 'laughing',
+  crying = 'crying',
+}
+
 export interface PlayerJSON {
   id: string;
   name: string;
-  hand: CardJSON[];
-  eaten: CardJSON[];
   score: number;
-  borrowedCount: number;
+  cardCount: number;
   jouerCount: number;
-  isMyTurn: boolean;
+  hand?: CardJSON[];
+  status?: PlayerStatus;
+}
+
+
+export interface TableJSON {
+  cards: CardJSON[];
+}
+
+export interface DeckJSON {
+  cards: CardJSON[];
+  discard: CardJSON[];
 }

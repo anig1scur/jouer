@@ -15,7 +15,6 @@ export class Card extends PIXI.Graphics {
   private bottomNumber: number;
   private bottomColor: number;
   private padding: number = 15;
-  private triangleRadius: number = 10;
   private triangleRatio: number = 4 / 3;
   private selected: boolean = false;
   private cardIndex: number;
@@ -175,7 +174,7 @@ export class Hand extends PIXI.Container {
     } else {
       this.selectedCards = this.selectedCards.filter((i) => i !== index);
     }
-    console.log(this.selectedCards);
+    // console.log(this.selectedCards);
   };
 
   drawHand(): void {
@@ -206,7 +205,6 @@ export class Hand extends PIXI.Container {
   }
 
   public getSelectedCards(): handCard[] {
-    // 根据选中的索引返回选中的卡牌
     return this.selectedCards.map((index) => this.cards[index]);
   }
 

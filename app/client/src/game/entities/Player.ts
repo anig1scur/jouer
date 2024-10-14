@@ -3,45 +3,20 @@ import Hand from '../assets/hand.png';
 import Face from '../assets/face.png';
 import Score from '../assets/score.png';
 import BoardBg from '../assets/boardBg.png';
-
-export class AssetsLoader {
-  private resources: Record<string, PIXI.Sprite | PIXI.Graphics> = {};
-
-  public async load(assets: {alias: string; src: string}[]): Promise<void> {
-    const loadPromises = assets.map(async (asset) => {
-      if (asset.src.endsWith('.svg')) {
-        const graphicsData = await PIXI.Assets.load({
-          alias: asset.alias,
-          src: asset.src,
-          data: {parseAsGraphicsContext: true},
-        });
-        this.resources[asset.alias] = new PIXI.Graphics(graphicsData);
-      } else {
-        const texture = await PIXI.Assets.load(asset.src);
-        this.resources[asset.alias] = new PIXI.Sprite(texture);
-      }
-    });
-
-    await Promise.all(loadPromises);
-  }
-
-  public get(alias: string): PIXI.Sprite | PIXI.Graphics {
-    return this.resources[alias];
-  }
-}
+import {AssetsLoader} from '../../utils/pixitool';
 
 class StatsBoard extends PIXI.Container {
-  private hand: number;
+  private cardCount: number;
   private score: number;
-  private handSprite: PIXI.Sprite;
+  private cardCountSprite: PIXI.Sprite;
   private scoreSprite: PIXI.Sprite;
-  private handCountText: PIXI.Text;
+  private cardCountText: PIXI.Text;
   private scoreCountText: PIXI.Text;
   private assetsLoader: AssetsLoader;
 
-  constructor(hand: number, score: number, assetsLoader: AssetsLoader) {
+  constructor(cardCount: number, score: number, assetsLoader: AssetsLoader) {
     super();
-    this.hand = hand;
+    this.cardCount = cardCount;
     this.score = score;
     this.assetsLoader = assetsLoader;
     this.initialize();
@@ -78,11 +53,11 @@ class StatsBoard extends PIXI.Container {
     boardBg.position.set(0, 0);
     this.addChild(boardBg);
 
-    this.handSprite = this.createSprite('hand', commonSpriteOptions);
-    this.handSprite.position.set(20, 10);
+    this.cardCountSprite = this.createSprite('cardCount', commonSpriteOptions);
+    this.cardCountSprite.position.set(20, 10);
 
-    this.handCountText = this.createText(this.hand.toString(), commonTextStyle);
-    this.handCountText.position.set(80, 0);
+    this.cardCountText = this.createText(this.cardCount.toString(), commonTextStyle);
+    this.cardCountText.position.set(80, 0);
 
     this.scoreSprite = this.createSprite('score', commonSpriteOptions);
     this.scoreSprite.position.set(20, 85);
@@ -92,8 +67,8 @@ class StatsBoard extends PIXI.Container {
   }
 
   public updateHand(newHand: number): void {
-    this.hand = newHand;
-    this.handCountText.text = newHand.toString();
+    this.cardCount = newHand;
+    this.cardCountText.text = newHand.toString();
   }
 
   public updateScore(newScore: number): void {
@@ -103,17 +78,17 @@ class StatsBoard extends PIXI.Container {
 }
 
 export class Player extends PIXI.Container {
-  private hand: number;
+  private cardCount: number;
   private score: number;
   private faceSprite: PIXI.Sprite | PIXI.Graphics;
   private statsBoard: StatsBoard;
   private assetsLoader: AssetsLoader;
 
-  constructor(name: string, hand: number, score: number) {
+  constructor(name: string, cardCount: number, score: number) {
     super();
 
     this.name = name;
-    this.hand = hand;
+    this.cardCount = cardCount;
     this.score = score;
     this.assetsLoader = new AssetsLoader();
 
@@ -123,7 +98,7 @@ export class Player extends PIXI.Container {
   private async initialize(): Promise<void> {
     await this.assetsLoader.load([
       {alias: 'face', src: Face},
-      {alias: 'hand', src: Hand},
+      {alias: 'cardCount', src: Hand},
       {alias: 'score', src: Score},
       {alias: 'boardBg', src: BoardBg},
     ]);
@@ -169,13 +144,13 @@ export class Player extends PIXI.Container {
   }
 
   private createRightSide(): void {
-    this.statsBoard = new StatsBoard(this.hand, this.score, this.assetsLoader);
+    this.statsBoard = new StatsBoard(this.cardCount, this.score, this.assetsLoader);
     this.statsBoard.position.set(150, 10);
     this.addChild(this.statsBoard);
   }
 
   public updateHand(newHand: number): void {
-    this.hand = newHand;
+    this.cardCount = newHand;
     this.statsBoard.updateHand(newHand);
   }
 

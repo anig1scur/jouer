@@ -136,25 +136,25 @@ export class JouerGame {
     this.playersManager.zIndex = ZINDEXES.PLAYERS;
     this.app.stage.addChild(this.playersManager);
 
-    const eunice = new PlayerSprite('Eunice', 5, 10)
-    const kusa = new PlayerSprite('kusa', 5, 10)
-    const helen = new PlayerSprite('Helen', 5, 10)
-    const huan = new PlayerSprite('huan', 5, 10)
+    const eunice = new PlayerSprite('Eunice', 5, 10);
+    const kusa = new PlayerSprite('kusa', 5, 10);
+    const helen = new PlayerSprite('Helen', 5, 10);
+    const ring = new PlayerSprite('ring', 5, 10);
 
     eunice.scale.set(0.5);
     kusa.scale.set(0.5);
     helen.scale.set(0.5);
-    huan.scale.set(0.5);
+    ring.scale.set(0.5);
 
     eunice.position.set(100, 60);
     kusa.position.set(100, 160);
     helen.position.set(100, 260);
-    huan.position.set(100, 360);
+    ring.position.set(100, 360);
 
     this.app.stage.addChild(eunice);
     this.app.stage.addChild(kusa);
     this.app.stage.addChild(helen);
-    this.app.stage.addChild(huan);
+    this.app.stage.addChild(ring);
 
     this.onActionSend = onActionSend;
   }
@@ -183,7 +183,6 @@ export class JouerGame {
 
   private dealCards = () => {
     const players = this.playersManager.getAll();
-    console.log(players);
     const cardsPerPlayer = Math.floor(this.deck.remainingCards() / players.length);
 
     players.forEach((player) => {
@@ -259,10 +258,8 @@ export class JouerGame {
       id: player.id,
       name: player.name,
       score: player.score,
-      isMyTurn: player === this.getCurrentPlayer(),
       hand: [],
-      eaten: [],
-      borrowedCount: player.borrowedCount,
+      cardCount: player.cardCount,
       jouerCount: player.jouerCount,
     }));
     return {
@@ -290,7 +287,7 @@ export class JouerGame {
     );
     this.playersManager.add(player.id, player);
     this.playersManager.addChild(player.sprite);
-    console.log(this.playersManager.children);
+
     // If the player is "you"
     if (isMe) {
       this.me = new Player(
@@ -326,7 +323,6 @@ export class JouerGame {
 
     player.name = attributes.name;
     player.score = attributes.score;
-    player.borrowedCount = attributes.borrowedCount;
     player.jouerCount = attributes.jouerCount;
 
     if (isMe) {

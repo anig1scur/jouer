@@ -1,19 +1,11 @@
-import {Schema, type, MapSchema, ArraySchema} from '@colyseus/schema';
+import {Schema, type, MapSchema, ArraySchema, filter} from '@colyseus/schema';
+import {Client} from 'colyseus';
 import {Player, Card, Deck, Table, Game} from '../entities';
 import {Constants, Types, Models} from '@jouer/common';
 
 export class GameState extends Schema {
   @type(Game)
   public game: Game;
-
-  @type('string')
-  public roomName: string;
-
-  @type('number')
-  public maxPlayers: number;
-
-  @type('string')
-  public state: 'waiting' | 'playing' | 'finished' = 'waiting';
 
   @type({map: Player})
   public players: MapSchema<Player> = new MapSchema<Player>();
@@ -24,6 +16,9 @@ export class GameState extends Schema {
   @type(Table)
   public table: Table;
 
+  @type(['string'])
+  public messages: ArraySchema<string> = new ArraySchema<string>();
+
   private currentPlayerIndex: number = 0;
 
   private onMessage: (message: Models.MessageJSON) => void;
@@ -31,8 +26,6 @@ export class GameState extends Schema {
   constructor(roomName: string, maxPlayers: number, onMessage: (message: Models.MessageJSON) => void) {
     super();
 
-    this.roomName = roomName;
-    this.maxPlayers = maxPlayers;
     this.onMessage = onMessage;
     this.game = new Game({
       roomName,
@@ -49,14 +42,14 @@ export class GameState extends Schema {
   }
 
   update() {
-    if (this.state === 'playing') {
-      this.updateGameState();
-    }
+    // if (this.state === 'playing') {
+    //   this.updateGameState();
+    // }
   }
 
   private updateGameState() {
     const currentPlayer = this.getCurrentPlayer();
-    if (currentPlayer.hand.length === 0) {
+    if (currentPlayer.cardCount === 0) {
       this.endGame(currentPlayer);
     }
   }
@@ -66,7 +59,6 @@ export class GameState extends Schema {
       throw new Error('Not enough players to start the game');
     }
 
-    this.state = 'playing';
     this.initCards();
 
     this.onMessage({
@@ -82,7 +74,9 @@ export class GameState extends Schema {
   }
 
   getPlayerHandSize(): number {
-    if (this.playerCount === 3) {
+    if (this.playerCount === 2) {
+      return (45 - 9) / 2;
+    } else if (this.playerCount === 3) {
       return 45 / 3;
     } else if (this.playerCount === 4) {
       return (45 - 1) / 4;
@@ -93,10 +87,10 @@ export class GameState extends Schema {
   }
 
   private initCards() {
-    this.deck.playerCount = this.playerCount;
-    this.deck.generateCards();
+    this.deck.initialize(this.playerCount);
 
     this.players.forEach((player) => {
+      console.log(`Dealing cards to ${player.id} ${player.name}`);
       for (let i = 0; i < this.getPlayerHandSize(); i++) {
         player.addCard(this.deck.randomDraw());
       }
@@ -104,7 +98,7 @@ export class GameState extends Schema {
   }
 
   playerAdd(id: string, name: string) {
-    if (this.players.size >= this.maxPlayers) {
+    if (this.players.size >= this.game.maxPlayers) {
       throw new Error('Maximum number of players reached');
     }
 
@@ -119,7 +113,7 @@ export class GameState extends Schema {
       params: {name: name},
     });
 
-    if (this.players.size === this.maxPlayers) {
+    if (this.players.size === this.game.maxPlayers) {
       this.startGame();
     }
   }
@@ -170,7 +164,7 @@ export class GameState extends Schema {
   private nextTurn() {
     this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.size;
     const nextPlayer = this.getCurrentPlayer();
-    nextPlayer.isMyTurn = true;
+    // nextPlayer.isMyTurn = true;
   }
 
   private getCurrentPlayer(): Player {
@@ -178,7 +172,7 @@ export class GameState extends Schema {
   }
 
   private endGame(winner: Player) {
-    this.state = 'finished';
+    this.game.state = 'awarding';
     this.onMessage({
       type: 'stop',
       from: 'server',

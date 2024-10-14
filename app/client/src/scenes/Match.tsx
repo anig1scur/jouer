@@ -5,8 +5,8 @@ import { Constants, Models, Types } from '@jouer/common';
 
 import { JouerGame as Game } from '../game/Game';
 import { Helmet } from 'react-helmet';
-import { View } from '../components';
 import qs from 'querystringify';
+import { Card } from '../game/entities/Card';
 
 interface IProps {
   roomId?: string;
@@ -131,7 +131,8 @@ export default class Match extends Component<IProps, IState> {
 
     // Listen for state changes
     this.room.state.game.onChange(this.handleGameChange);
-    this.room.state.deck.listen('cards', this.handleGameChange);
+    // this.room.state.deck.onChange(this.handleCardsChange);
+    // this.room.state.hand.onChange(this.handleCardsChange);
     this.room.state.players.onAdd(this.handlePlayerAdd);
     this.room.state.players.onRemove(this.handlePlayerRemove);
 
@@ -167,14 +168,19 @@ export default class Match extends Component<IProps, IState> {
   };
 
   // HANDLERS: Colyseus
+
+  handleCardsChange = (curCards: Card[]) => {
+    console.log(curCards.map((card) => card.id));
+  }
+
   handleGameChange = (attributes: any, k) => {
-    console.log(attributes, 'attributes',k)
-    if(!attributes) {
+    if (!attributes) {
       return;
     }
-    for (const row of attributes) {
-      this.game.gameUpdate(row.field, row.value);
-    }
+    console.log(attributes);
+    // for (const row of attributes) {
+    // this.game.gameUpdate(row.field, row.value);
+    // }
   };
 
   handlePlayerAdd = (player: any, playerId: string) => {
@@ -186,9 +192,15 @@ export default class Match extends Component<IProps, IState> {
     player.onChange = () => {
       this.handlePlayerUpdate(player, playerId);
     };
+
+    player.listen("hand", (curCards: Card[]) => {
+      console.log(player, "change")
+      this.handleCardsChange(curCards);
+    })
   };
 
   handlePlayerUpdate = (player: any, playerId: string) => {
+    console.log(player, "update")
     const isMe = this.isPlayerIdMe(playerId);
     this.game.playerUpdate(playerId, player, isMe);
   };

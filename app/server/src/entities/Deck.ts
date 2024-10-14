@@ -2,9 +2,6 @@ import {Schema, type} from '@colyseus/schema';
 import {Card} from './Card';
 
 export class Deck extends Schema {
-  @type('number')
-  public playerCount: number = 0;
-
   @type([Card])
   public cards: Card[];
 
@@ -17,13 +14,13 @@ export class Deck extends Schema {
     this.discards = [];
   }
 
-  initialize(): void {
-    this.generateCards(true);
+  initialize(playerCount: number): void {
+    this.generateCards(playerCount, true);
   }
 
-  generateCards(shuffle?: boolean): void {
+  generateCards(playerCount, shuffle?: boolean): void {
     this.cards = [];
-    let iStart = this.playerCount === 2 ? 9 : 10;
+    let iStart = playerCount === 2 ? 9 : 10;
 
     for (let i = iStart; i >= 2; i--) {
       for (let j = i - 1; j >= 1; j--) {
@@ -31,6 +28,7 @@ export class Deck extends Schema {
       }
     }
 
+    console.log('Shuffling cards', shuffle);
     if (shuffle) {
       this.shuffleCards();
     }
