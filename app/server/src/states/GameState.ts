@@ -19,7 +19,8 @@ export class GameState extends Schema {
   @type(['string'])
   public messages: ArraySchema<string> = new ArraySchema<string>();
 
-  private currentPlayerIndex: number = 0;
+  @type('string')
+  public activePlayer: string = '';
 
   private onMessage: (message: Models.MessageJSON) => void;
 
@@ -60,7 +61,7 @@ export class GameState extends Schema {
       throw new Error('Not enough players to start the game');
     }
 
-    console.log("startGame");
+    console.log('startGame');
     this.initCards();
 
     this.onMessage({
@@ -90,12 +91,15 @@ export class GameState extends Schema {
 
   private initCards() {
     this.deck.initialize(this.playerCount);
-
     this.players.forEach((player) => {
-      player.emptyHand();
+      player.clearHand();
       console.log(`Dealing cards to ${player.id} ${player.name}`);
       for (let i = 0; i < this.getPlayerHandSize(); i++) {
         player.addCard(this.deck.randomDraw());
+      }
+      if (player.firstHand) {
+        console.log(`Dealing first hand card to ${player.id} ${player.name}`);
+        this.activePlayer = player.id;
       }
     });
   }
@@ -164,13 +168,13 @@ export class GameState extends Schema {
   }
 
   private nextTurn() {
-    this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.size;
-    const nextPlayer = this.getCurrentPlayer();
-    // nextPlayer.isMyTurn = true;
+    const idx = Array.from(this.players.keys()).indexOf(this.activePlayer);
+    const nextIdx = (idx + 1) % this.players.size;
+    this.activePlayer = Array.from(this.players.keys())[nextIdx];
   }
 
   private getCurrentPlayer(): Player {
-    return Array.from(this.players.values())[this.currentPlayerIndex];
+    return this.players.get(this.activePlayer);
   }
 
   private endGame(winner: Player) {

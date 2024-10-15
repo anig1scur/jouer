@@ -1,7 +1,6 @@
 import {AnimatedSprite, Container, Graphics, Texture} from 'pixi.js';
 
 import {Constants, Models} from '@jouer/common';
-import {TextSprite} from '../sprites';
 import {Player} from './Player';
 import {Card} from './Card';
 

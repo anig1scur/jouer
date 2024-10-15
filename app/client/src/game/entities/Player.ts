@@ -92,9 +92,10 @@ export class Player extends BaseEntity {
   private assetsLoader: AssetsLoader;
   private hand: Card[] = [];
 
-  constructor(name: string, cardCount: number, score: number) {
+  constructor(id:string, name: string, cardCount: number, score: number) {
     super();
 
+    this.id = id;
     this.name = name;
     this.cardCount = cardCount;
     this.score = score;

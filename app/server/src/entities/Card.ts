@@ -24,4 +24,13 @@ export class Card extends Schema {
     this.owner = null;
     this.state = 'in_deck';
   }
+
+  isFirstHandCard(): boolean {
+    // [1,2] [2,1]
+    return this.values.reduce((a, b) => a + b) === 3;
+  }
+
+  reverse() {
+    this.values.reverse();
+  }
 }

@@ -60,14 +60,14 @@ export class Card extends BaseEntity {
 
   private toggleSelect = (): void => {
     this.selected = !this.selected;
-    this.container.y = this.selected ? this.container.y - 20 : this.container.y + 20;
+    this.container.y = this.selected ? this.container.y - 30 : this.container.y + 30;
 
     this.onSelectCallback(this.cardIndex, this.selected);
   };
 
   public setSelected(selected: boolean): void {
     this.selected = selected;
-    this.container.y = this.selected ? this.container.y - 20 : this.container.y + 20;
+    this.container.y = this.selected ? this.container.y - 30 : this.container.y + 30;
   }
 
   private drawCard(): void {
@@ -183,7 +183,7 @@ export class Hand extends PIXI.Container {
   drawHand(): void {
     this.removeChildren();
     const totalCards = this.cards.length;
-    const totalAngle = Math.PI / 6;
+    const totalAngle = Math.PI / 8;
 
     this.cards.forEach((card, index) => {
       const angleStep = totalAngle / totalCards;
@@ -191,7 +191,7 @@ export class Hand extends PIXI.Container {
 
       const cardSprite = new Card(index, card.id, card.values, card.owner, card.state, this.onCardSelect);
       cardSprite.container.rotation = angle;
-      cardSprite.container.position.set(index * HAND_CARD_WIDTH, Math.abs(angle) * 100);
+      cardSprite.container.position.set(index * HAND_CARD_WIDTH, Math.abs(angle) * 200);
 
       this.addChild(cardSprite.container);
     });
@@ -210,5 +210,12 @@ export class Hand extends PIXI.Container {
   public removeCard(index: number): void {
     this.cards.splice(index, 1);
     this.drawHand();
+  }
+
+  public reverse(): void {
+    this.cards.reverse();
+    this.cards.forEach((card, index) => {
+      card.values.reverse();
+    });
   }
 }

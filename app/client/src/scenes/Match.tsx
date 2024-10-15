@@ -132,6 +132,8 @@ export default class Match extends Component<IProps, IState> {
     // Listen for state changes
     this.room.state.game.onChange(this.handleGameChange);
     this.room.state.players.onAdd(this.handlePlayerAdd);
+    this.room.state.listen("activePlayer", this.handleActivePlayerChange);
+    // this.room.state.players.onChange(this.handlePlayerUpdate);
     this.room.state.players.onRemove(this.handlePlayerRemove);
 
     // Listen for Messages
@@ -173,30 +175,36 @@ export default class Match extends Component<IProps, IState> {
 
   }
 
+  handleActivePlayerChange = (playerId: string) => {
+    console.log(playerId, "activePlayer")
+    this.game.activePlayerUpdate(playerId);
+  }
+
   handleGameChange = (attributes: any, k) => {
     if (!attributes) {
       return;
     }
     console.log(attributes);
-    // for (const row of attributes) {
-    // this.game.gameUpdate(row.field, row.value);
-    // }
+    for (const row of attributes) {
+      this.game.gameUpdate(row.field, row.value);
+    }
   };
 
-  handlePlayerAdd = (player: any, playerId: string) => {
 
+  handlePlayerAdd = (player: any, playerId: string) => {
     const isMe = this.isPlayerIdMe(playerId);
-    console.log("isMe", playerId);
     this.game.playerAdd(playerId, player, isMe);
-    this.updateRoom();
-    player.listen("hand", (curCards: any[]) => {
-      console.log('curCards', curCards, curCards.map((card) => card.id));
-      this.handleCardsChange(curCards);
-    })
+    // this.updateRoom();
+    if (isMe) {
+      player.listen("hand", (curCards: any[]) => {
+        this.handleCardsChange(curCards);
+      })
+    }
   };
 
   handlePlayerUpdate = (player: any, playerId: string) => {
     console.log(player, "update")
+
     const isMe = this.isPlayerIdMe(playerId);
     this.game.playerUpdate(playerId, player, isMe);
   };
@@ -258,12 +266,13 @@ export default class Match extends Component<IProps, IState> {
 
   // METHODS
   isPlayerIdMe = (playerId: string) => {
-    return this.state.hud.playerId === playerId;
+    return this.room.sessionId === playerId;
+
+    // return this.state.hud.playerId === playerId;
   };
 
   updateRoom = () => {
     const stats = this.game.getStats();
-    // console.log("stats", stats);
 
     this.setState((prev) => ({
       ...prev,

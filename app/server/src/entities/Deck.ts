@@ -27,7 +27,6 @@ export class Deck extends Schema {
         this.cards.push(new Card(`${i}-${j}`, [i, j]));
       }
     }
-
     console.log('Shuffling cards', shuffle);
     if (shuffle) {
       this.shuffleCards();
@@ -35,16 +34,20 @@ export class Deck extends Schema {
   }
 
   shuffleCards(): void {
-    for (let i = this.cards.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
+    for (let i = 0; i < this.cards.length; i++) {
+      if (Math.random() < 0.5) {
+        this.cards[i].reverse();
+      }
     }
+
+    this.cards.sort(() => Math.random() - 0.5);
   }
 
   randomDraw(): Card {
     if (this.cards.length === 0) {
       throw new Error('No more cards in the deck');
     }
+
     return this.cards.pop()!;
   }
 
