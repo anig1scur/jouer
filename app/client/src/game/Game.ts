@@ -16,7 +16,6 @@ export interface Stats {
   playerName: string;
   players: Models.PlayerJSON[];
   playersCount: number;
-  currentPlayerIndex: number;
 }
 
 export const app = new Application();
@@ -58,7 +57,6 @@ export class JouerGame {
   private playersManager: PlayersManager;
   private actionManager: ActionManager;
 
-  private currentPlayerIndex: number = 0;
   private onActionSend: (action: Models.ActionJSON) => void;
 
   constructor(screenWidth: number, screenHeight: number, onActionSend: any) {
@@ -149,20 +147,28 @@ export class JouerGame {
     // Update game state, animations, etc.
   };
 
-  private initializeGame = () => {
-    this.determineStartingPlayer();
-  };
+  private initializeGame = () => {};
 
-  private determineStartingPlayer = () => {
-    // For simplicity, let's start with a random player
-    this.currentPlayerIndex = Math.floor(Math.random() * this.playersManager.getAll().length);
-  };
+  private bindActionCallbacks = () => {
+    this.actionManager.bindHandler('play', () => {
+      this.playCards(this.me.id, this.handManager.getSelectedCards());
+    });
 
+    this.actionManager.bindHandler('jouer', () => {
+      this.jouer(this.me.id);
+    });
+
+    this.actionManager.bindHandler('borrow', () => {
+      this.borrowCard(this.me.id);
+    });
+  };
   playCards = (playerId: string, cards: Card[]) => {
     const player = this.playersManager.get(playerId);
     if (!player || player !== this.getCurrentPlayer()) {
       throw new Error("It's not your turn!");
     }
+
+    console.log(cards, 'play');
 
     if (!this.isValidPlay(cards)) {
       throw new Error('Invalid play!');
@@ -183,7 +189,8 @@ export class JouerGame {
   };
 
   private nextTurn = () => {
-    this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.playersManager.getAll().length;
+    // Implement the logic to move to the next player's turn
+    // This might involve skipping players, reversing the order, etc.
   };
 
   jouer = (playerId: string) => {
@@ -204,13 +211,27 @@ export class JouerGame {
     this.nextTurn();
   };
 
+  borrowCard = (playerId: string) => {
+    const player = this.playersManager.get(playerId);
+    if (!player || player !== this.getCurrentPlayer()) {
+      throw new Error("It's not your turn!");
+    }
+
+    // Implement borrowing logic
+    // This might involve borrowing a card from the table
+
+    // this.handManager.updatePlayerHand(playerId, player.getHand());
+
+    this.nextTurn();
+  };
+
   private getCurrentPlayer = (): Player => {
-    return this.playersManager.getAll()[this.currentPlayerIndex];
+    return this.playersManager.get(this.activePlayer);
   };
 
   private getNextPlayer = (): Player => {
-    const nextIndex = (this.currentPlayerIndex + 1) % this.playersManager.getAll().length;
-    return this.playersManager.getAll()[nextIndex];
+    const currentIndex = this.playersManager.getAll().findIndex((player) => player.id === this.activePlayer);
+    return this.playersManager.getAll()[(currentIndex + 1) % this.playersManager.getAll().length];
   };
 
   getStats = (): Stats => {
@@ -227,7 +248,6 @@ export class JouerGame {
       playerName: this.me ? this.me.name : '',
       players,
       playersCount: this.playersManager.getAll().length,
-      currentPlayerIndex: this.currentPlayerIndex,
     };
   };
 
@@ -287,12 +307,10 @@ export class JouerGame {
 
   activePlayerUpdate = (playerId: string) => {
     this.activePlayer = playerId;
-    console.log(playerId, this.me.id);
     if (this.activePlayer === this.me.id) {
       this.actionManager.show();
-      this.actionManager.setActions([
-        "borrow", "jouer", "play"
-      ])
+      this.actionManager.setActions(['borrow', 'jouer', 'play']);
+      this.bindActionCallbacks();
     } else {
       this.actionManager.hide();
     }

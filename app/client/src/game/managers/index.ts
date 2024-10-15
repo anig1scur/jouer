@@ -6,6 +6,8 @@ import {BaseEntity} from '../entities';
 import {Card} from '../entities/Card';
 import {Player} from '../entities/Player';
 import {Models} from '@jouer/common/src';
+import {AssetsLoader} from '../../utils/pixitool';
+import Btn from '../assets/btn.png';
 
 export class BaseManager<T extends BaseEntity> extends Container {
   protected container: Container;
@@ -69,6 +71,10 @@ export class HandManager extends BaseManager<Card> {
     });
   }
 
+  getSelectedCards() {
+    return Object.values(this.entities).filter((card) => card.selected);
+  }
+
   reverseCards() {}
 }
 
@@ -103,23 +109,47 @@ export class PlayersManager extends BaseManager<Player> {
 
 class ActionButton extends BaseEntity {
   private text: PIXI.Text;
+  private type: Models.ActionType;
+
+  private assetsLoader: AssetsLoader;
 
   constructor(type: Models.ActionType) {
     super();
+    this.type = type;
     this.container = new Container();
     this.container.name = `ActionButton_${type}`;
+    this.assetsLoader = new AssetsLoader();
+    this.initialize();
+  }
 
-    const background = new Sprite(PIXI.Texture.WHITE);
-    background.width = 120;
-    background.height = 40;
-    background.tint = 0x3498db;
+  async initialize() {
+    await this.assetsLoader.load([
+      {
+        alias: 'btn',
+        src: Btn,
+      },
+    ]);
+    this.draw();
+  }
+
+  draw() {
+    const background = this.assetsLoader.get('btn');
+    background.scale.set(0.36);
+    this.container.pivot.set(background.width / 2, background.height / 2);
+
+    this.container.onmouseover = () => {
+      this.container.scale.set(1.1);
+    };
+    this.container.onmouseout = () => {
+      this.container.scale.set(1);
+    };
 
     this.text = new PIXI.Text({
-      text: type.toUpperCase(),
+      text: this.type.toUpperCase(),
       style: {
-        fontFamily: 'Arial',
-        fontSize: 16,
-        fill: 0xffffff,
+        fontFamily: 'jmadh',
+        fontSize: 32,
+        fill: 0xa06c30,
       },
     });
     this.text.anchor.set(0.5);
@@ -149,10 +179,10 @@ export class ActionManager extends BaseManager<ActionButton> {
 
     // Center the action buttons
     const totalWidth = actions.length * 140 - 20;
-    this.position.set((800 - totalWidth) / 2, 550);
+    this.position.set(screen.width / 2 - totalWidth / 2, screen.height - 100);
   }
 
-  addClickHandler(action: Models.ActionType, handler: () => void) {
+  bindHandler(action: Models.ActionType, handler: () => void) {
     const button = this.entities[action];
     if (button) {
       button.container.on('click', handler);

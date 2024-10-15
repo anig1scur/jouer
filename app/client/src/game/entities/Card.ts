@@ -28,7 +28,7 @@ export class Card extends BaseEntity {
   private topNumber: number;
   private bottomNumber: number;
 
-  private selected: boolean = false;
+  public selected: boolean = false;
   private cardIndex: number;
   private onSelectCallback: (index: number, selected: boolean) => void;
 
@@ -62,7 +62,7 @@ export class Card extends BaseEntity {
     this.selected = !this.selected;
     this.container.y = this.selected ? this.container.y - 30 : this.container.y + 30;
 
-    this.onSelectCallback(this.cardIndex, this.selected);
+    this.onSelectCallback && this.onSelectCallback(this.cardIndex, this.selected);
   };
 
   public setSelected(selected: boolean): void {
