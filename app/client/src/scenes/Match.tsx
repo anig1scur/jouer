@@ -170,6 +170,7 @@ export default class Match extends Component<IProps, IState> {
   // HANDLERS: Colyseus
 
   handleCardsChange = (curCards: Card[]) => {
+    this.game.gameUpdate('hand', curCards);
     console.log(curCards.map((card) => card.id));
   }
 
@@ -189,14 +190,11 @@ export default class Match extends Component<IProps, IState> {
     this.game.playerAdd(playerId, player, isMe);
     this.updateRoom();
 
-    player.onChange = () => {
-      this.handlePlayerUpdate(player, playerId);
-    };
-
-    player.listen("hand", (curCards: Card[]) => {
-      console.log(player, "change")
-      this.handleCardsChange(curCards);
-    })
+    if (isMe) {
+      player.listen("hand", (curCards: Card[]) => {
+        this.handleCardsChange(curCards);
+      })
+    }
   };
 
   handlePlayerUpdate = (player: any, playerId: string) => {
@@ -266,6 +264,7 @@ export default class Match extends Component<IProps, IState> {
 
   updateRoom = () => {
     const stats = this.game.getStats();
+    // console.log("stats", stats);
 
     this.setState((prev) => ({
       ...prev,

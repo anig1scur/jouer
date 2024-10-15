@@ -42,6 +42,7 @@ export class GameState extends Schema {
   }
 
   update() {
+    this.updateGameState();
     // if (this.state === 'playing') {
     //   this.updateGameState();
     // }

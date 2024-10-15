@@ -54,6 +54,7 @@ export class GameRoom extends Room<GameState> {
   onLeave(client: Client) {
     this.state.playerRemove(client.sessionId);
     this.state.messages.push(`Player ${this.state.players[client.sessionId].name} left the game`);
+    console.log(`${new Date().toISOString()} [Leave] id=${client.sessionId}`);
   }
 
   //

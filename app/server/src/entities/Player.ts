@@ -11,7 +11,7 @@ export class Player extends Schema {
   public name: string;
 
   @filter(function (this: Player, client: Client, value: ArraySchema<Card>) {
-    // console.log("Player's session ID:", client.sessionId, "Player's ID:", this.id)
+    console.log("Player's session ID:", client.sessionId, "Player's ID:", this.id)
     return client.sessionId === this.id;
   })
   @type([Card])

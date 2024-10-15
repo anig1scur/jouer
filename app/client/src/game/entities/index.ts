@@ -1,7 +1,9 @@
-import { AnimatedSprite, Container, Graphics, Texture } from 'pixi.js';
+import {AnimatedSprite, Container, Graphics, Texture} from 'pixi.js';
 
-import { Constants, Models } from '@jouer/common';
-import { TextSprite } from "../sprites";
+import {Constants, Models} from '@jouer/common';
+import {TextSprite} from '../sprites';
+import {Player as PlayerSprite} from './Player';
+import {Card} from './Card';
 export interface BaseProps {
   x: number;
   y: number;
@@ -17,18 +19,10 @@ export class BaseEntity {
 
   debug?: Graphics;
 
-  constructor (props: BaseProps) {
+  constructor(props: BaseProps) {
     this.container = new Container();
-
-    // Sprite
-    // this.sprite = new TextSprite(
-    //   'asd',
-    //   20,
-    //   0.5,
-    //   0.5,
-    // );
     this.sprite = new Graphics();
-    this.sprite.fill(0x22AACC).circle(400, 200, 80).fill();
+    this.sprite.fill(0x22aacc).circle(400, 200, 80).fill();
     this.sprite.position.set(props.radius, props.radius);
     this.sprite.width = props.radius * 2;
     this.sprite.height = props.radius * 2;
@@ -40,10 +34,13 @@ export class BaseEntity {
     // Debug
     if (Constants.DEBUG) {
       this.debug = new Graphics();
-      this.debug.lineStyle(0.5, 0xff00ff);
-      this.debug.drawCircle(this.container.width / 2, this.container.height / 2, this.container.width / 2);
-      this.debug.drawRect(0, 0, this.container.width, this.container.height);
-      this.debug.endFill();
+      this.debug.setStrokeStyle({
+        color: 'red',
+        width: 1,
+      });
+      this.debug.circle(this.container.width / 2, this.container.height / 2, this.container.width / 2);
+      this.debug.rect(0, 0, this.container.width, this.container.height);
+      this.debug.fill();
       this.container.addChild(this.debug);
     }
 
@@ -65,18 +62,6 @@ export class BaseEntity {
   }
 }
 
-
-
-export class Card extends BaseEntity {
-  public value: number;
-
-  constructor (props: BaseProps, value: number) {
-    super(props);
-    this.value = value;
-  }
-  // 可能还有其他方法，如 toString(), compare(), 等
-}
-
 export class Player extends BaseEntity {
   public id: string;
   public name: string;
@@ -86,10 +71,11 @@ export class Player extends BaseEntity {
   public cardCount: number = 0;
   public status: Models.PlayerStatus = Models.PlayerStatus.default;
 
-  constructor (props: BaseProps, id: string, name: string) {
+  constructor(props: BaseProps, id: string, name: string) {
     super(props);
     this.id = id;
     this.name = name;
+    // const sprite = new PlayerSprite(
   }
 
   setHand(cards: Card[]) {
@@ -118,8 +104,8 @@ export class Player extends BaseEntity {
 export class Deck extends BaseEntity {
   private cards: Card[] = [];
 
-  constructor () {
-    super({ x: 0, y: 0, textures: [], zIndex: 1, radius: 10 });
+  constructor() {
+    super({x: 0, y: 0, textures: [], zIndex: 1, radius: 10});
   }
 
   shuffle() {

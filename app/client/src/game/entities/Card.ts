@@ -1,45 +1,53 @@
 import * as PIXI from 'pixi.js';
 import {colorShade} from '../../utils/color';
 import {Text} from 'pixi.js';
+import { Models } from '@jouer/common/src';
 
-type handCard = number[];
+type handCard = Models.CardJSON;
 
 const CARD_BG = '#FFEDD7';
 const BORDER_COLOR = '#A06C30';
+const PADDING = 15;
+const TRIANGLE_RATIO = 4 / 3;
+const TOP_COLOR = 0xffe6bd;
+const BOTTOM_COLOR = 0xe2976f;
+const DEFAULT_CARD_WIDTH = 120;
+const DEFAULT_CARD_HEIGHT = 180;
+const HAND_CARD_WIDTH = 80;
+const HAND_CARD_HEIGHT = 120;
 
 export class Card extends PIXI.Graphics {
-  private cardWidth: number;
-  private cardHeight: number;
+  private id: string;
+  private values: number[];
+  private owner: string;
+  private state: string;
+
+  private cardWidth: number = DEFAULT_CARD_WIDTH;
+  private cardHeight: number = DEFAULT_CARD_HEIGHT;
   private topNumber: number;
-  private topColor: number;
   private bottomNumber: number;
-  private bottomColor: number;
-  private padding: number = 15;
-  private triangleRatio: number = 4 / 3;
+
   private selected: boolean = false;
   private cardIndex: number;
   private onSelectCallback: (index: number, selected: boolean) => void;
 
   constructor(
     cardIndex: number,
-    topNumber: number,
-    topColor: number,
-    bottomNumber: number,
-    bottomColor: number,
-    onSelectCallback: (index: number, selected: boolean) => void,
-    width: number = 120,
-    height: number = 180
+    id: string,
+    values: number[],
+    owner: string,
+    state: string,
+    onSelectCallback: (index: number, selected: boolean) => void
   ) {
     super();
+
     this.cardIndex = cardIndex;
-    this.cardWidth = width;
-    this.cardHeight = height;
-    this.width = width;
-    this.height = height;
-    this.topNumber = topNumber;
-    this.topColor = topColor;
-    this.bottomNumber = bottomNumber;
-    this.bottomColor = bottomColor;
+    this.topNumber = values[0];
+    this.bottomNumber = values[1];
+    this.id = id;
+    this.values = values;
+    this.state = state;
+    this.owner = owner;
     this.onSelectCallback = onSelectCallback;
 
     this.drawCard();
@@ -83,18 +91,15 @@ export class Card extends PIXI.Graphics {
 
   private drawTopTriangle(): void {
     const topTriangle = new PIXI.Graphics().setStrokeStyle({
-      color: colorShade(this.topColor.toString(16), -50),
+      color: colorShade(TOP_COLOR.toString(16), -50),
       width: 2,
     });
-    topTriangle.fill(this.topColor);
+    topTriangle.fill(TOP_COLOR);
 
-    topTriangle.moveTo(this.padding, this.padding);
-    topTriangle.lineTo(this.cardWidth / this.triangleRatio, this.padding);
-    topTriangle.lineTo(this.padding, this.cardHeight / this.triangleRatio);
-    topTriangle.lineTo(this.padding, this.padding);
-
-    // 为什么在 fill 前后 stroke 样式这么不一样？
-    // topTriangle.stroke();
+    topTriangle.moveTo(PADDING, PADDING);
+    topTriangle.lineTo(this.cardWidth / TRIANGLE_RATIO, PADDING);
+    topTriangle.lineTo(PADDING, this.cardHeight / TRIANGLE_RATIO);
+    topTriangle.lineTo(PADDING, PADDING);
 
     topTriangle.fill();
     topTriangle.stroke();
@@ -122,14 +127,14 @@ export class Card extends PIXI.Graphics {
 
   private drawBottomTriangle(): void {
     const bottomTriangle = new PIXI.Graphics().setStrokeStyle({
-      color: colorShade(this.bottomColor.toString(16), -50),
+      color: colorShade(BOTTOM_COLOR.toString(16), -50),
       width: 2,
     });
-    bottomTriangle.fill(this.bottomColor);
-    bottomTriangle.moveTo(this.cardWidth - this.padding, this.cardHeight - this.padding);
-    bottomTriangle.lineTo(this.cardWidth - this.cardWidth / this.triangleRatio, this.cardHeight - this.padding);
-    bottomTriangle.lineTo(this.cardWidth - this.padding, this.cardHeight - this.cardHeight / this.triangleRatio);
-    bottomTriangle.lineTo(this.cardWidth - this.padding, this.cardHeight - this.padding);
+    bottomTriangle.fill(BOTTOM_COLOR);
+    bottomTriangle.moveTo(this.cardWidth - PADDING, this.cardHeight - PADDING);
+    bottomTriangle.lineTo(this.cardWidth - this.cardWidth / TRIANGLE_RATIO, this.cardHeight - PADDING);
+    bottomTriangle.lineTo(this.cardWidth - PADDING, this.cardHeight - this.cardHeight / TRIANGLE_RATIO);
+    bottomTriangle.lineTo(this.cardWidth - PADDING, this.cardHeight - PADDING);
     bottomTriangle.fill();
     bottomTriangle.stroke();
 
@@ -147,10 +152,9 @@ export class Card extends PIXI.Graphics {
       },
     });
 
-    // bottomText rotate by center
     bottomText.anchor.set(1);
     bottomText.rotation = Math.PI;
-    bottomText.position.set(this.cardWidth / 2 + this.padding, this.cardHeight / 2 + this.padding);
+    bottomText.position.set(this.cardWidth / 2 + PADDING, this.cardHeight / 2 + PADDING);
     bottomTriangle.addChild(bottomText);
     this.addChild(bottomTriangle);
   }
@@ -159,8 +163,6 @@ export class Card extends PIXI.Graphics {
 export class Hand extends PIXI.Container {
   private cards: handCard[];
   private selectedCards: number[] = [];
-  private cardWidth: 80;
-  private cardHeight: 120;
 
   constructor(cards: handCard[]) {
     super();
@@ -174,7 +176,6 @@ export class Hand extends PIXI.Container {
     } else {
       this.selectedCards = this.selectedCards.filter((i) => i !== index);
     }
-    // console.log(this.selectedCards);
   };
 
   drawHand(): void {
@@ -188,16 +189,14 @@ export class Hand extends PIXI.Container {
 
       const cardSprite = new Card(
         index,
-        card[0],
-        0xffe6bd,
-        card[1],
-        0xe2976f,
-        this.onCardSelect,
-        this.cardWidth,
-        this.cardHeight
-      );
+        card.id,
+        card.values,
+        card.owner,
+        card.state,
+        this.onCardSelect
+      )
       cardSprite.rotation = angle;
-      cardSprite.position.set(index * 80, Math.abs(angle) * 100);
+      cardSprite.position.set(index * HAND_CARD_WIDTH, Math.abs(angle) * 100);
 
       this.addChild(cardSprite);
     });

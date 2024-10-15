@@ -1,6 +1,6 @@
 export interface CardJSON {
   id: string;
-  value: number;
+  values: number[];
   owner: string | null;
   state: string;
 }

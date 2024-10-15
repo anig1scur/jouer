@@ -1,6 +1,6 @@
 import {Application, Container, Texture, Sprite, Text} from 'pixi.js';
-import {Card, Deck, Player} from './entities';
-import {Hand} from './entities/Card';
+import {Deck, Player} from './entities';
+import {Card, Hand} from './entities/Card';
 import {Player as PlayerSprite} from './entities/Player';
 import {Models} from '@jouer/common/src';
 import {CardsManager, PlayersManager} from './managers';
@@ -18,7 +18,6 @@ export interface Stats {
   players: Models.PlayerJSON[];
   playersCount: number;
   currentPlayerIndex: number;
-  lastPlayedSet: Card[];
 }
 
 export const app = new Application();
@@ -50,14 +49,13 @@ export class JouerGame {
 
   private app: Application;
   private table: Container;
-  private deck: Deck;
+  private hand: Hand;
 
   private me: Player;
 
   private cardsManager: CardsManager;
   private playersManager: PlayersManager;
   private currentPlayerIndex: number = 0;
-  private lastPlayedSet: Card[] = [];
   private onActionSend: (action: Models.ActionJSON) => void;
 
   constructor(screenWidth: number, screenHeight: number, onActionSend: any) {
@@ -112,49 +110,33 @@ export class JouerGame {
     this.table.zIndex = ZINDEXES.TABLE;
     this.app.stage.addChild(this.table);
 
-    this.deck = new Deck();
     this.cardsManager = new CardsManager();
     this.cardsManager.zIndex = ZINDEXES.CARDS;
     this.app.stage.addChild(this.cardsManager);
-
-    const hand = new Hand([
-      [5, 8],
-      [7, 9],
-      [5, 8],
-      [7, 9],
-      [5, 8],
-      [7, 9],
-      [2, 1],
-      [8, 3],
-      [3, 1],
-    ]);
-
-    hand.position.set(window.innerWidth / 2 - 250, window.innerHeight / 2);
-    this.app.stage.addChild(hand);
 
     this.playersManager = new PlayersManager();
     this.playersManager.zIndex = ZINDEXES.PLAYERS;
     this.app.stage.addChild(this.playersManager);
 
-    const eunice = new PlayerSprite('Eunice', 5, 10);
-    const kusa = new PlayerSprite('kusa', 5, 10);
-    const helen = new PlayerSprite('Helen', 5, 10);
-    const ring = new PlayerSprite('ring', 5, 10);
+    // const eunice = new PlayerSprite('Eunice', 5, 10);
+    // const kusa = new PlayerSprite('kusa', 5, 10);
+    // const helen = new PlayerSprite('Helen', 5, 10);
+    // const ring = new PlayerSprite('ring', 5, 10);
 
-    eunice.scale.set(0.5);
-    kusa.scale.set(0.5);
-    helen.scale.set(0.5);
-    ring.scale.set(0.5);
+    // eunice.scale.set(0.5);
+    // kusa.scale.set(0.5);
+    // helen.scale.set(0.5);
+    // ring.scale.set(0.5);
 
-    eunice.position.set(100, 60);
-    kusa.position.set(100, 160);
-    helen.position.set(100, 260);
-    ring.position.set(100, 360);
+    // eunice.position.set(100, 60);
+    // kusa.position.set(100, 160);
+    // helen.position.set(100, 260);
+    // ring.position.set(100, 360);
 
-    this.app.stage.addChild(eunice);
-    this.app.stage.addChild(kusa);
-    this.app.stage.addChild(helen);
-    this.app.stage.addChild(ring);
+    // this.app.stage.addChild(eunice);
+    // this.app.stage.addChild(kusa);
+    // this.app.stage.addChild(helen);
+    // this.app.stage.addChild(ring);
 
     this.onActionSend = onActionSend;
   }
@@ -165,6 +147,10 @@ export class JouerGame {
     this.app.start();
     this.app.ticker.add(this.update);
     this.initializeGame();
+
+    const hand = new Hand([]);
+    hand.position.set(window.innerWidth / 2 - 250, window.innerHeight / 2);
+    this.app.stage.addChild(hand);
   };
 
   stop = () => {
@@ -177,19 +163,7 @@ export class JouerGame {
   };
 
   private initializeGame = () => {
-    this.dealCards();
     this.determineStartingPlayer();
-  };
-
-  private dealCards = () => {
-    const players = this.playersManager.getAll();
-    const cardsPerPlayer = Math.floor(this.deck.remainingCards() / players.length);
-
-    players.forEach((player) => {
-      const cards = this.deck.draw(cardsPerPlayer);
-      player.setHand(cards);
-      this.cardsManager.addPlayerHand(player.id, cards);
-    });
   };
 
   private determineStartingPlayer = () => {
@@ -208,7 +182,6 @@ export class JouerGame {
     }
 
     player.removeCardsFromHand(cards);
-    this.lastPlayedSet = cards;
     this.cardsManager.updatePlayerHand(playerId, player.getHand());
     this.cardsManager.setLastPlayedCards(cards);
 
@@ -258,18 +231,16 @@ export class JouerGame {
       id: player.id,
       name: player.name,
       score: player.score,
-      hand: [],
+      hand: player.getHand() as Models.CardJSON[],
       cardCount: player.cardCount,
       jouerCount: player.jouerCount,
     }));
     return {
-      roomName: 'Jouer Game Room',
-      // playerName: this.getCurrentPlayer().name,
-      playerName: 'asdasd',
+      roomName: "Dnd's Happy Scout Time",
+      playerName: this.me ? this.me.name : '',
       players,
       playersCount: this.playersManager.getAll().length,
       currentPlayerIndex: this.currentPlayerIndex,
-      lastPlayedSet: this.lastPlayedSet,
     };
   };
 
@@ -285,6 +256,7 @@ export class JouerGame {
       playerId,
       attributes.name
     );
+    console.log(player, attributes, 'add');
     this.playersManager.add(player.id, player);
     this.playersManager.addChild(player.sprite);
 
@@ -331,9 +303,13 @@ export class JouerGame {
   };
 
   gameUpdate = (name: string, value: any) => {
+    console.log(name, value);
     switch (name) {
       case 'roomName':
         this.roomName = value;
+        break;
+      case 'hand':
+        this.hand = value;
         break;
       default:
         break;
