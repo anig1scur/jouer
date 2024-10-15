@@ -22,6 +22,10 @@ export class GameState extends Schema {
   @type('string')
   public activePlayer: string = '';
 
+  get player(): Player {
+    return this.players.get(this.activePlayer);
+  }
+
   private onMessage: (message: Models.MessageJSON) => void;
 
   constructor(roomName: string, maxPlayers: number, onMessage: (message: Models.MessageJSON) => void) {
@@ -138,6 +142,7 @@ export class GameState extends Schema {
   }
 
   playCards(playerId: string, cards: Card[]) {
+    console.log('playCards', playerId, cards);
     const player = this.players.get(playerId);
     if (!player || player !== this.getCurrentPlayer()) {
       throw new Error("Not the player's turn");

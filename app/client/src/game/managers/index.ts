@@ -85,9 +85,10 @@ export class TableManager extends BaseManager<Card> {
 
   setCards(cards: Card[]) {
     this.removeChildren();
-    this.position.set(300, 500);
+    this.position.set(500, 200);
     const totalCards = cards.length;
     const totalAngle = Math.PI / 6;
+    this.scale.set(0.75);
     cards.forEach((card, index) => {
       const angleStep = totalAngle / totalCards;
       const angle = -totalAngle / 2 + index * angleStep;

@@ -167,25 +167,56 @@ export class JouerGame {
     if (!player || player !== this.getCurrentPlayer()) {
       throw new Error("It's not your turn!");
     }
-
-    console.log(cards, 'play');
-
     if (!this.isValidPlay(cards)) {
       throw new Error('Invalid play!');
     }
-
-    player.removeCardsFromHand(cards);
-    // this.handManager.updatePlayerHand(playerId, player.getHand());
-    // this.handManager.setLastPlayedCards(cards);
-
-    this.nextTurn();
+    console.log(cards, 'play');
+    this.onActionSend({
+      type: 'play',
+      playerId,
+      ts: 1,
+      value: cards.map((card) => card.cardIndex).join(','),
+    });
   };
 
+  isSequence(cards: Card[]): boolean {
+    const cardValues = cards.map((card) => card.value);
+
+    for (let i = 1; i < cardValues.length; i++) {
+      if (cardValues[i] !== cardValues[i - 1] + 1 || cardValues[i] !== cardValues[i - 1] + 1) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   private isValidPlay = (cards: Card[]): boolean => {
-    // Implement the logic to check if the play is valid according to Jouer rules
-    // This should include checking for pairs, triples, full houses, straights, etc.
-    // Also, check if the play beats the last played set
-    return true; // Placeholder
+    // 1. if all cards cardIndex is continuous
+    // 2. if is single / sequence / same
+    // 3. if the cardIndex is bigger than the last played cardIndex
+
+    if (cards.length === 0) {
+      return false;
+    }
+
+    const sortedCards = cards.slice().sort((a, b) => a.cardIndex - b.cardIndex);
+    for (let i = 1; i < sortedCards.length; i++) {
+      if (sortedCards[i].cardIndex !== sortedCards[i - 1].cardIndex + 1) {
+        return false;
+      }
+    }
+
+    if (cards.length === 1) {
+      return true;
+    } else if (cards.length > 1) {
+      if (cards.every((card) => card.value === cards[0].value)) {
+        return true;
+      } else if (this.isSequence(cards)) {
+        return true;
+      }
+    }
+
+    return false;
   };
 
   private nextTurn = () => {

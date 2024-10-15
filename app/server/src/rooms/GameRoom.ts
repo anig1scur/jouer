@@ -34,17 +34,23 @@ export class GameRoom extends Room<GameState> {
       // Validate which type of message is accepted
       switch (type) {
         case 'borrow':
-        case 'play':
         case 'jouer':
           console.log(`${new Date().toISOString()} [Message] id=${playerId} type=${type}`);
+          break;
+        case 'play':
+          this.state.playCards(
+            playerId,
+            this.state.player.hand.map((card, i) => message.value.includes(i) && card).filter(Boolean)
+          );
           break;
         case 'ready':
           const player = this.state.players.get(client.sessionId);
           player.ready = true;
-
+          console.log("readyreadyready")
           if (this.state.players.size === this.state.game.maxPlayers && this.allPlayersReady()) {
             this.state.startGame();
           }
+          break;
         default:
           break;
       }

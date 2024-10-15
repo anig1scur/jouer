@@ -65,12 +65,13 @@ export class Player extends Schema {
   }
 
   playCards(cards: Card[]): void {
-    cards.forEach((card) => {
-      const index = this.hand.findIndex((c) => c.id === card.id);
-      if (index !== -1) {
-        this.hand.splice(index, 1);
-      }
-    });
+    console.log(this.hand, 'playing !');
+
+    const cardIdsToRemove = new Set(cards.map(card => card.id));
+
+    this.hand = new ArraySchema<Card>(
+      ...this.hand.filter(card => !cardIdsToRemove.has(card.id))
+    );
   }
 
   borrowCard(card: Card, idx: number): void {

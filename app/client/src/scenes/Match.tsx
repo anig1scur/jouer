@@ -132,6 +132,7 @@ export default class Match extends Component<IProps, IState> {
     // Listen for state changes
     this.room.state.game.onChange(this.handleGameChange);
     this.room.state.players.onAdd(this.handlePlayerAdd);
+    this.room.state.table.listen("cards", this.handleTableChange);
     this.room.state.listen("activePlayer", this.handleActivePlayerChange);
     // this.room.state.players.onChange(this.handlePlayerUpdate);
     this.room.state.players.onRemove(this.handlePlayerRemove);
@@ -189,6 +190,10 @@ export default class Match extends Component<IProps, IState> {
       this.game.gameUpdate(row.field, row.value);
     }
   };
+
+  handleTableChange = (cards: Card[]) => {
+    this.game.tableUpdate(cards);
+  }
 
 
   handlePlayerAdd = (player: any, playerId: string) => {

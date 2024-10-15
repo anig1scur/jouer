@@ -29,7 +29,7 @@ export class Card extends BaseEntity {
   private bottomNumber: number;
 
   public selected: boolean = false;
-  private cardIndex: number;
+  public cardIndex: number;
   private onSelectCallback: (index: number, selected: boolean) => void;
 
   constructor(
@@ -56,6 +56,10 @@ export class Card extends BaseEntity {
     this.container.eventMode = 'dynamic';
     this.container.cursor = 'pointer';
     this.container.on('pointerdown', this.toggleSelect);
+  }
+
+  get value(): number {
+    return this.values[0];
   }
 
   private toggleSelect = (): void => {
