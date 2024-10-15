@@ -27,7 +27,6 @@ export class GameRoom extends Room<GameState> {
     this.setSimulationInterval(() => this.handleTick());
 
     console.log(`${new Date().toISOString()} [Create] player=${playerName} room=${roomName}max=${this.maxClients} `);
-
     // Listen to messages from clients
     this.onMessage('*', (client: Client, type: string | number, message: Models.ActionJSON) => {
       const playerId = client.sessionId;
@@ -39,6 +38,13 @@ export class GameRoom extends Room<GameState> {
         case 'jouer':
           console.log(`${new Date().toISOString()} [Message] id=${playerId} type=${type}`);
           break;
+        case 'ready':
+          const player = this.state.players.get(client.sessionId);
+          player.ready = true;
+
+          if (this.state.players.size === this.state.game.maxPlayers && this.allPlayersReady()) {
+            this.state.startGame();
+          }
         default:
           break;
       }
@@ -46,15 +52,19 @@ export class GameRoom extends Room<GameState> {
   }
 
   onJoin(client: Client, options: Types.IPlayerOptions) {
+    console.log(`${new Date().toISOString()} [Join] id=${client.sessionId} player=${options.playerName}`);
     this.state.playerAdd(client.sessionId, options.playerName);
     this.state.messages.push(`Player ${options.playerName} joined the game`);
-    console.log(`${new Date().toISOString()} [Join] id=${client.sessionId} player=${options.playerName}`);
   }
 
   onLeave(client: Client) {
+    console.log(`${new Date().toISOString()} [Leave] id=${client.sessionId}`);
     this.state.playerRemove(client.sessionId);
     this.state.messages.push(`Player ${this.state.players[client.sessionId].name} left the game`);
-    console.log(`${new Date().toISOString()} [Leave] id=${client.sessionId}`);
+  }
+
+  allPlayersReady() {
+    return Array.from(this.state.players.values()).every((player) => player.ready);
   }
 
   //

@@ -4,6 +4,9 @@ import Face from '../assets/face.png';
 import Score from '../assets/score.png';
 import BoardBg from '../assets/boardBg.png';
 import {AssetsLoader} from '../../utils/pixitool';
+import {Card} from './Card';
+import {Models} from '@jouer/common/src';
+import { BaseEntity } from '.';
 
 class StatsBoard extends PIXI.Container {
   private cardCount: number;
@@ -77,12 +80,17 @@ class StatsBoard extends PIXI.Container {
   }
 }
 
-export class Player extends PIXI.Container {
-  private cardCount: number;
-  private score: number;
+export class Player extends BaseEntity {
+  public id: string;
+  public name: string;
+  public score: number = 0;
+  public jouerCount: number = 0;
+  public cardCount: number = 0;
+  public status: Models.PlayerStatus = Models.PlayerStatus.default;
   private faceSprite: PIXI.Sprite | PIXI.Graphics;
   private statsBoard: StatsBoard;
   private assetsLoader: AssetsLoader;
+  private hand: Card[] = [];
 
   constructor(name: string, cardCount: number, score: number) {
     super();
@@ -93,6 +101,14 @@ export class Player extends PIXI.Container {
     this.assetsLoader = new AssetsLoader();
 
     this.initialize();
+  }
+
+  setHand(cards: Card[]) {
+    this.hand = cards;
+  }
+
+  getHand(): Card[] {
+    return this.hand;
   }
 
   private async initialize(): Promise<void> {
@@ -110,7 +126,7 @@ export class Player extends PIXI.Container {
   private createSprite(alias: string, options: Partial<PIXI.Sprite>): PIXI.Sprite {
     const sprite = this.assetsLoader.get(alias) as PIXI.Sprite;
     Object.assign(sprite, options);
-    this.addChild(sprite);
+    this.container.addChild(sprite);
     return sprite;
   }
 
@@ -124,7 +140,7 @@ export class Player extends PIXI.Container {
         ...style,
       },
     });
-    this.addChild(textObj);
+    this.container.addChild(textObj);
     return textObj;
   }
 
@@ -146,7 +162,7 @@ export class Player extends PIXI.Container {
   private createRightSide(): void {
     this.statsBoard = new StatsBoard(this.cardCount, this.score, this.assetsLoader);
     this.statsBoard.position.set(150, 10);
-    this.addChild(this.statsBoard);
+    this.container.addChild(this.statsBoard);
   }
 
   public updateHand(newHand: number): void {
@@ -157,5 +173,23 @@ export class Player extends PIXI.Container {
   public updateScore(newScore: number): void {
     this.score = newScore;
     this.statsBoard.updateScore(newScore);
+  }
+
+  removeRandomCard(): Card {
+    const randomIndex = Math.floor(Math.random() * this.hand.length);
+    const card = this.hand[randomIndex];
+    this.hand.splice(randomIndex, 1);
+    return card;
+  }
+
+  removeCardsFromHand(cards: Card[]): void {
+    cards.forEach((card) => {
+      const index = this.hand.findIndex((c) => c.id === card.id);
+      this.hand.splice(index, 1);
+    });
+  }
+
+  addCardToHand(card: Card): void {
+    this.hand.push(card);
   }
 }

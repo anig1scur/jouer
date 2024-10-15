@@ -42,7 +42,7 @@ export class GameState extends Schema {
   }
 
   update() {
-    this.updateGameState();
+    // this.updateGameState();
     // if (this.state === 'playing') {
     //   this.updateGameState();
     // }
@@ -60,6 +60,7 @@ export class GameState extends Schema {
       throw new Error('Not enough players to start the game');
     }
 
+    console.log("startGame");
     this.initCards();
 
     this.onMessage({
@@ -91,6 +92,7 @@ export class GameState extends Schema {
     this.deck.initialize(this.playerCount);
 
     this.players.forEach((player) => {
+      player.emptyHand();
       console.log(`Dealing cards to ${player.id} ${player.name}`);
       for (let i = 0; i < this.getPlayerHandSize(); i++) {
         player.addCard(this.deck.randomDraw());
@@ -105,7 +107,6 @@ export class GameState extends Schema {
 
     const player = new Player(id, name);
     this.players.set(id, player);
-    console.log(`Player ${name} joined the game`);
 
     this.onMessage({
       type: 'joined',
@@ -114,9 +115,9 @@ export class GameState extends Schema {
       params: {name: name},
     });
 
-    if (this.players.size === this.game.maxPlayers) {
-      this.startGame();
-    }
+    // if (this.players.size === this.game.maxPlayers) {
+    //   this.startGame();
+    // }
   }
 
   playerRemove(id: string) {

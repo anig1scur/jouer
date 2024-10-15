@@ -1,9 +1,8 @@
 import {Application, Container, Texture, Sprite, Text} from 'pixi.js';
-import {Deck, Player} from './entities';
+import {Player} from './entities/Player';
 import {Card, Hand} from './entities/Card';
-import {Player as PlayerSprite} from './entities/Player';
 import {Models} from '@jouer/common/src';
-import {CardsManager, PlayersManager} from './managers';
+import {HandManager, PlayersManager} from './managers';
 
 const ZINDEXES = {
   TABLE: 1,
@@ -53,7 +52,7 @@ export class JouerGame {
 
   private me: Player;
 
-  private cardsManager: CardsManager;
+  private handManager: HandManager;
   private playersManager: PlayersManager;
   private currentPlayerIndex: number = 0;
   private onActionSend: (action: Models.ActionJSON) => void;
@@ -110,9 +109,9 @@ export class JouerGame {
     this.table.zIndex = ZINDEXES.TABLE;
     this.app.stage.addChild(this.table);
 
-    this.cardsManager = new CardsManager();
-    this.cardsManager.zIndex = ZINDEXES.CARDS;
-    this.app.stage.addChild(this.cardsManager);
+    this.handManager = new HandManager();
+    this.handManager.zIndex = ZINDEXES.CARDS;
+    this.app.stage.addChild(this.handManager);
 
     this.playersManager = new PlayersManager();
     this.playersManager.zIndex = ZINDEXES.PLAYERS;
@@ -147,10 +146,6 @@ export class JouerGame {
     this.app.start();
     this.app.ticker.add(this.update);
     this.initializeGame();
-
-    const hand = new Hand([]);
-    hand.position.set(window.innerWidth / 2 - 250, window.innerHeight / 2);
-    this.app.stage.addChild(hand);
   };
 
   stop = () => {
@@ -160,6 +155,9 @@ export class JouerGame {
 
   private update = () => {
     // Update game state, animations, etc.
+
+
+
   };
 
   private initializeGame = () => {
@@ -182,8 +180,8 @@ export class JouerGame {
     }
 
     player.removeCardsFromHand(cards);
-    this.cardsManager.updatePlayerHand(playerId, player.getHand());
-    this.cardsManager.setLastPlayedCards(cards);
+    // this.handManager.updatePlayerHand(playerId, player.getHand());
+    // this.handManager.setLastPlayedCards(cards);
 
     this.nextTurn();
   };
@@ -211,8 +209,8 @@ export class JouerGame {
     const joueredCard = nextPlayer.removeRandomCard();
     player.addCardToHand(joueredCard);
 
-    this.cardsManager.updatePlayerHand(playerId, player.getHand());
-    this.cardsManager.updatePlayerHand(nextPlayer.id, nextPlayer.getHand());
+    // this.handManager.updatePlayerHand(playerId, player.getHand());
+    // this.handManager.updatePlayerHand(nextPlayer.id, nextPlayer.getHand());
 
     this.nextTurn();
   };
@@ -231,7 +229,7 @@ export class JouerGame {
       id: player.id,
       name: player.name,
       score: player.score,
-      hand: player.getHand() as Models.CardJSON[],
+      hand: player.getHand(),
       cardCount: player.cardCount,
       jouerCount: player.jouerCount,
     }));
@@ -245,37 +243,23 @@ export class JouerGame {
   };
 
   playerAdd = (playerId: string, attributes: Models.PlayerJSON, isMe: boolean) => {
-    const player = new Player(
-      {
-        x: 0,
-        y: 0,
-        zIndex: ZINDEXES.PLAYERS,
-        radius: 10,
-        textures: [],
-      },
-      playerId,
-      attributes.name
-    );
+    const player = new Player(attributes.name, attributes.cardCount, attributes.score);
+
     console.log(player, attributes, 'add');
     this.playersManager.add(player.id, player);
-    this.playersManager.addChild(player.sprite);
 
     // If the player is "you"
-    if (isMe) {
-      this.me = new Player(
-        {
-          x: 0,
-          y: 0,
-          zIndex: ZINDEXES.PLAYERS,
-          radius: 10,
-          textures: [],
-        },
-        playerId,
-        attributes.name
-      );
+    // if (isMe) {
+    //   this.me = new Player(attributes.name, attributes.cardCount, attributes.score);
 
-      this.playersManager.addChild(this.table);
-    }
+    //   this.playersManager.addChild(this.table);
+    // }
+    this.onActionSend({
+      type: "ready",
+      playerId,
+      ts: 1,
+      value:""
+    })
   };
 
   playerRemove = (playerId: string, isMe: boolean) => {
@@ -293,9 +277,12 @@ export class JouerGame {
       return;
     }
 
+    console.log(player, attributes, 'update');
     player.name = attributes.name;
     player.score = attributes.score;
     player.jouerCount = attributes.jouerCount;
+    player.cardCount = attributes.cardCount;
+    player.setHand(attributes.hand || []);
 
     if (isMe) {
       this.me = player;
@@ -314,5 +301,9 @@ export class JouerGame {
       default:
         break;
     }
+  };
+
+  handUpdate = (cards: any[]) => {
+    this.handManager.setCards(cards.map((card, idx) => new Card(idx, card.id, card.values, card.owner, card.state)));
   };
 }

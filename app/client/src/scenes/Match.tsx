@@ -131,8 +131,6 @@ export default class Match extends Component<IProps, IState> {
 
     // Listen for state changes
     this.room.state.game.onChange(this.handleGameChange);
-    // this.room.state.deck.onChange(this.handleCardsChange);
-    // this.room.state.hand.onChange(this.handleCardsChange);
     this.room.state.players.onAdd(this.handlePlayerAdd);
     this.room.state.players.onRemove(this.handlePlayerRemove);
 
@@ -170,8 +168,9 @@ export default class Match extends Component<IProps, IState> {
   // HANDLERS: Colyseus
 
   handleCardsChange = (curCards: Card[]) => {
-    this.game.gameUpdate('hand', curCards);
-    console.log(curCards.map((card) => card.id));
+    // this.game.gameUpdate('hand', curCards);
+    this.game.handUpdate(curCards);
+
   }
 
   handleGameChange = (attributes: any, k) => {
@@ -187,14 +186,13 @@ export default class Match extends Component<IProps, IState> {
   handlePlayerAdd = (player: any, playerId: string) => {
 
     const isMe = this.isPlayerIdMe(playerId);
+    console.log("isMe", playerId);
     this.game.playerAdd(playerId, player, isMe);
     this.updateRoom();
-
-    if (isMe) {
-      player.listen("hand", (curCards: Card[]) => {
-        this.handleCardsChange(curCards);
-      })
-    }
+    player.listen("hand", (curCards: any[]) => {
+      console.log('curCards', curCards, curCards.map((card) => card.id));
+      this.handleCardsChange(curCards);
+    })
   };
 
   handlePlayerUpdate = (player: any, playerId: string) => {
@@ -249,6 +247,7 @@ export default class Match extends Component<IProps, IState> {
       return;
     }
 
+    console.log(action.type, "message")
     this.room.send(action.type, action);
   };
 

@@ -1,7 +1,8 @@
 import * as PIXI from 'pixi.js';
 import {colorShade} from '../../utils/color';
 import {Text} from 'pixi.js';
-import { Models } from '@jouer/common/src';
+import {Models} from '@jouer/common/src';
+import {BaseEntity} from '.';
 
 type handCard = Models.CardJSON;
 
@@ -16,11 +17,11 @@ const DEFAULT_CARD_HEIGHT = 180;
 const HAND_CARD_WIDTH = 80;
 const HAND_CARD_HEIGHT = 120;
 
-export class Card extends PIXI.Graphics {
-  private id: string;
-  private values: number[];
-  private owner: string;
-  private state: string;
+export class Card extends BaseEntity {
+  public id: string;
+  public values: number[];
+  public owner: string;
+  public state: string;
 
   private cardWidth: number = DEFAULT_CARD_WIDTH;
   private cardHeight: number = DEFAULT_CARD_HEIGHT;
@@ -37,42 +38,43 @@ export class Card extends PIXI.Graphics {
     values: number[],
     owner: string,
     state: string,
-    onSelectCallback: (index: number, selected: boolean) => void
+    onSelectCallback?: (index: number, selected: boolean) => void
   ) {
     super();
 
-    this.cardIndex = cardIndex;
-    this.topNumber = values[0];
-    this.bottomNumber = values[1];
     this.id = id;
     this.values = values;
     this.state = state;
     this.owner = owner;
+
+    this.cardIndex = cardIndex;
+    this.topNumber = values[0];
+    this.bottomNumber = values[1];
     this.onSelectCallback = onSelectCallback;
 
     this.drawCard();
-    this.eventMode = 'dynamic';
-    this.cursor = 'pointer';
-    this.on('pointerdown', this.toggleSelect);
+    this.container.eventMode = 'dynamic';
+    this.container.cursor = 'pointer';
+    this.container.on('pointerdown', this.toggleSelect);
   }
 
   private toggleSelect = (): void => {
     this.selected = !this.selected;
-    this.y = this.selected ? this.y - 20 : this.y + 20;
+    this.container.y = this.selected ? this.container.y - 20 : this.container.y + 20;
 
     this.onSelectCallback(this.cardIndex, this.selected);
   };
 
   public setSelected(selected: boolean): void {
     this.selected = selected;
-    this.y = this.selected ? this.y - 20 : this.y + 20;
+    this.container.y = this.selected ? this.container.y - 20 : this.container.y + 20;
   }
 
   private drawCard(): void {
     this.drawBackground();
     this.drawTopTriangle();
     this.drawBottomTriangle();
-    this.hitArea = new PIXI.Rectangle(0, 0, this.cardWidth, this.cardHeight);
+    this.container.hitArea = new PIXI.Rectangle(0, 0, this.cardWidth, this.cardHeight);
   }
 
   private drawBackground(): void {
@@ -86,7 +88,7 @@ export class Card extends PIXI.Graphics {
       width: 2,
     });
     background.stroke();
-    this.addChild(background);
+    this.container.addChild(background);
   }
 
   private drawTopTriangle(): void {
@@ -122,7 +124,7 @@ export class Card extends PIXI.Graphics {
 
     topTriangle.addChild(topText);
 
-    this.addChild(topTriangle);
+    this.container.addChild(topTriangle);
   }
 
   private drawBottomTriangle(): void {
@@ -156,7 +158,7 @@ export class Card extends PIXI.Graphics {
     bottomText.rotation = Math.PI;
     bottomText.position.set(this.cardWidth / 2 + PADDING, this.cardHeight / 2 + PADDING);
     bottomTriangle.addChild(bottomText);
-    this.addChild(bottomTriangle);
+    this.container.addChild(bottomTriangle);
   }
 }
 
@@ -187,18 +189,11 @@ export class Hand extends PIXI.Container {
       const angleStep = totalAngle / totalCards;
       const angle = -totalAngle / 2 + index * angleStep;
 
-      const cardSprite = new Card(
-        index,
-        card.id,
-        card.values,
-        card.owner,
-        card.state,
-        this.onCardSelect
-      )
-      cardSprite.rotation = angle;
-      cardSprite.position.set(index * HAND_CARD_WIDTH, Math.abs(angle) * 100);
+      const cardSprite = new Card(index, card.id, card.values, card.owner, card.state, this.onCardSelect);
+      cardSprite.container.rotation = angle;
+      cardSprite.container.position.set(index * HAND_CARD_WIDTH, Math.abs(angle) * 100);
 
-      this.addChild(cardSprite);
+      this.addChild(cardSprite.container);
     });
     this.position.set(100, 100);
   }
