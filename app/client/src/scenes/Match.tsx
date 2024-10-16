@@ -133,7 +133,7 @@ export default class Match extends Component<IProps, IState> {
     this.room.state.game.onChange(this.handleGameChange);
     this.room.state.players.onAdd(this.handlePlayerAdd);
     this.room.state.table.listen("cards", this.handleTableChange);
-    this.room.state.listen("activePlayer", this.handleActivePlayerChange);
+    this.room.state.listen("activePlayerId", this.handleActivePlayerChange);
     // this.room.state.players.onChange(this.handlePlayerUpdate);
     this.room.state.players.onRemove(this.handlePlayerRemove);
 
@@ -173,7 +173,6 @@ export default class Match extends Component<IProps, IState> {
   handleCardsChange = (curCards: Card[]) => {
     // this.game.gameUpdate('hand', curCards);
     this.game.handUpdate(curCards);
-
   }
 
   handleActivePlayerChange = (playerId: string) => {
@@ -205,6 +204,15 @@ export default class Match extends Component<IProps, IState> {
       player.listen("hand", (curCards: any[]) => {
         this.handleCardsChange(curCards);
       })
+
+      player.listen("borrowingCard", (card: Models.CardJSON) => {
+        this.game.borrowingCardUpdate(card)
+      })
+
+      // 没有 Add ， 全用 onChange 来 handle
+      // player.hand.onAdd((card: Card, idx: number) => {
+      //   this.handleCardAdd(player.hand);
+      // })
     }
   };
 

@@ -19,7 +19,7 @@ export class Table extends Schema {
     this.cards = new ArraySchema<Card>(...cards);
   }
 
-  borrowCard(player: Player, cardId: string): Card {
-    return new Card('0-0', [0, 0]);
+  borrowCard(cardIndex: number) {
+    return this.cards.splice(cardIndex, 1)[0];
   }
 }

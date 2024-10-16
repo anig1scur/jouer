@@ -33,14 +33,19 @@ export class GameRoom extends Room<GameState> {
 
       // Validate which type of message is accepted
       switch (type) {
+        case 'tryBorrow':
+          this.state.tryBorrowCard(playerId, message.value);
+          break;
         case 'borrow':
+          this.state.borrowCard(playerId, message.value.cardIdx, message.value.inverse, message.value.targetIdx);
+          break;
         case 'jouer':
           console.log(`${new Date().toISOString()} [Message] id=${playerId} type=${type}`);
           break;
         case 'play':
           this.state.playCards(
             playerId,
-            this.state.player.hand
+            this.state.activePlayer.hand
               .map(
                 (card, i) =>
                   message.value

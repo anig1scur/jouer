@@ -38,6 +38,9 @@ export class Player extends Schema {
   @type('boolean')
   public ready: boolean;
 
+  @type(Card)
+  public borrowingCard: Card;
+
   public firstHand: boolean;
 
   // Init
@@ -55,13 +58,22 @@ export class Player extends Schema {
     this.hand = new ArraySchema<Card>();
   }
 
-  addCard(card: Card): void {
+  tryBorrowCard(card: Card) {
+    this.borrowingCard = card;
+  }
+
+  addCard(card: Card, idx?: number): void {
     card.owner = this.id;
     if (card.isFirstHandCard()) {
       this.firstHand = true;
       this.status = Models.PlayerStatus.thinking;
     }
-    this.hand.push(card);
+    if (idx !== undefined) {
+      this.hand.splice(idx, 0, card);
+    } else {
+      this.hand.push(card);
+    }
+    this.hand = new ArraySchema<Card>(...this.hand);
     console.log('Player', this.id, 'received card', card.id);
   }
 
@@ -83,6 +95,7 @@ export class Player extends Schema {
   }
 
   incrementBorrowedCount(): void {
+    this.score++;
     // this.borrowedCount++;
   }
 }

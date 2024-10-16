@@ -1,4 +1,4 @@
-export type ActionType = 'borrow' | 'play' | 'jouer' | 'ready';
+export type ActionType = 'tryBorrow' | 'borrow' | 'play' | 'jouer' | 'ready';
 
 export interface ActionJSON {
   type: ActionType;

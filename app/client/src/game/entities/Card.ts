@@ -3,6 +3,7 @@ import {colorShade} from '../../utils/color';
 import {Text} from 'pixi.js';
 import {Models} from '@jouer/common/src';
 import {BaseEntity} from '.';
+import {HandManager, TableManager} from '../managers';
 
 type handCard = Models.CardJSON;
 
@@ -30,7 +31,10 @@ export class Card extends BaseEntity {
 
   public selected: boolean = false;
   public cardIndex: number;
+
   private onSelectCallback: (index: number, selected: boolean) => void;
+  private mode?: 'hand' | 'table' | 'borrow';
+  private cardManager: TableManager | HandManager;
 
   constructor(
     cardIndex: number,
@@ -38,6 +42,8 @@ export class Card extends BaseEntity {
     values: number[],
     owner: string,
     state: string,
+    cardManager: TableManager | HandManager,
+    mode?: 'hand' | 'table' | 'borrow',
     onSelectCallback?: (index: number, selected: boolean) => void
   ) {
     super();
@@ -46,6 +52,8 @@ export class Card extends BaseEntity {
     this.values = values;
     this.state = state;
     this.owner = owner;
+    this.cardManager = cardManager;
+    this.mode = mode;
 
     this.cardIndex = cardIndex;
     this.topNumber = values[0];
@@ -55,21 +63,54 @@ export class Card extends BaseEntity {
     this.drawCard();
     this.container.eventMode = 'dynamic';
     this.container.cursor = 'pointer';
-    this.container.on('pointerdown', this.toggleSelect);
+    this.container.on('pointerdown', this.handleSelection);
   }
 
   get value(): number {
     return this.values[0];
   }
 
-  private toggleSelect = (): void => {
+  clone(): Card {
+    return new Card(this.cardIndex, this.id, this.values, this.owner, this.state, this.cardManager);
+  }
+
+  private handleSelection = (): void => {
+    if (!this.mode) {
+      return;
+    }
+
+    if (this.mode === 'table' && !this.isFirstOrLast()) {
+      // In 'table' mode, only the first or last card can be selected
+      return;
+    }
+
     this.selected = !this.selected;
     this.container.y = this.selected ? this.container.y - 30 : this.container.y + 30;
 
     this.onSelectCallback && this.onSelectCallback(this.cardIndex, this.selected);
+
+    if (this.selected && this.mode === 'table') {
+      this.deselectOtherCards();
+    }
   };
 
+  private isFirstOrLast(): boolean {
+    return this.cardIndex === 0 || this.cardIndex === this.cardManager.cards.length - 1;
+  }
+
+  private deselectOtherCards(): void {
+    this.cardManager.cards.forEach((card) => {
+      if (card !== this) {
+        card.setSelected(false);
+      }
+    });
+  }
+
   public setSelected(selected: boolean): void {
+    if (this.selected === selected) {
+      return;
+    }
+
     this.selected = selected;
     this.container.y = this.selected ? this.container.y - 30 : this.container.y + 30;
   }

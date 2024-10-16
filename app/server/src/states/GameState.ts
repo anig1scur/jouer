@@ -20,10 +20,10 @@ export class GameState extends Schema {
   public messages: ArraySchema<string> = new ArraySchema<string>();
 
   @type('string')
-  public activePlayer: string = '';
+  public activePlayerId: string = '';
 
-  get player(): Player {
-    return this.players.get(this.activePlayer);
+  get activePlayer(): Player {
+    return this.players.get(this.activePlayerId);
   }
 
   private onMessage: (message: Models.MessageJSON) => void;
@@ -37,7 +37,6 @@ export class GameState extends Schema {
       maxPlayers,
       mode: 'jouer',
       onWaitingStart: this.handleWaitingStart,
-      onLobbyStart: this.handleLobbyStart,
       onGameStart: this.handleGameStart,
       onGameEnd: this.handleGameEnd,
     });
@@ -103,13 +102,12 @@ export class GameState extends Schema {
       }
       if (player.firstHand) {
         console.log(`Dealing first hand card to ${player.id} ${player.name}`);
-        this.activePlayer = player.id;
+        this.activePlayerId = player.id;
       }
     });
   }
 
   canPlayCards(cards: Card[]): boolean {
-
     if (!this.deck.isValidPlay(cards)) {
       return false;
     }
@@ -168,22 +166,47 @@ export class GameState extends Schema {
       this.nextTurn();
     } else {
       // throw new Error('Invalid play');
-      console.log('invalid play')
-      this.messages.push(
-        'Invalid play'
-      )
+      console.log('invalid play');
+      this.messages.push('Invalid play');
     }
   }
 
-  borrowCard(playerId: string, cardId: string) {
+  tryBorrowCard(playerId: string, cardIdx: number) {
     const player = this.players.get(playerId);
     if (!player || player !== this.getCurrentPlayer()) {
       throw new Error("Not the player's turn");
     }
 
-    const card = this.table.borrowCard(player, cardId);
+    const card = this.table.cards[cardIdx];
     if (card) {
-      this.getCurrentPlayer().incrementBorrowedCount();
+      player.tryBorrowCard(card);
+    } else {
+      throw new Error('Cannot borrow this card');
+    }
+  }
+
+
+  borrowCard(playerId: string, cardIdx: number, inverse: boolean, targetIdx: number) {
+    const player = this.players.get(playerId);
+    if (!player || player !== this.getCurrentPlayer()) {
+      throw new Error("Not the player's turn");
+    }
+
+    console.log('borrowCard', playerId, cardIdx, inverse, targetIdx);
+
+    const card = this.table.borrowCard(cardIdx);
+    this.table.setCards(this.table.cards.map((c) => (c ? c : null)));
+
+    const preOwner = this.players.get(card.owner);
+    preOwner.incrementBorrowedCount();
+
+    card.owner = player.id;
+
+    const owner = this.players.get(player.id);
+    owner.addCard(card);
+    owner.borrowingCard = null;
+
+    if (card) {
       this.nextTurn();
     } else {
       throw new Error('Cannot borrow this card');
@@ -191,13 +214,13 @@ export class GameState extends Schema {
   }
 
   private nextTurn() {
-    const idx = Array.from(this.players.keys()).indexOf(this.activePlayer);
+    const idx = Array.from(this.players.keys()).indexOf(this.activePlayerId);
     const nextIdx = (idx + 1) % this.players.size;
-    this.activePlayer = Array.from(this.players.keys())[nextIdx];
+    this.activePlayerId = Array.from(this.players.keys())[nextIdx];
   }
 
   private getCurrentPlayer(): Player {
-    return this.players.get(this.activePlayer);
+    return this.players.get(this.activePlayerId);
   }
 
   private endGame(winner: Player) {

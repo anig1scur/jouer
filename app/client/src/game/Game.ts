@@ -111,7 +111,7 @@ export class JouerGame {
     this.table.zIndex = ZINDEXES.TABLE;
     this.app.stage.addChild(this.table);
 
-    this.handManager = new HandManager();
+    this.handManager = new HandManager(this.borrowCard);
     this.handManager.zIndex = ZINDEXES.CARDS;
     this.app.stage.addChild(this.handManager);
 
@@ -159,15 +159,15 @@ export class JouerGame {
     });
 
     this.actionManager.bindHandler('borrow', () => {
-      this.borrowCard(this.me.id);
+      this.preBorrowCard(this.me.id, this.tableManager.getSelectedCard());
     });
   };
+
   playCards = (playerId: string, cards: Card[]) => {
     const player = this.playersManager.get(playerId);
     if (!player || player !== this.getCurrentPlayer()) {
       throw new Error("It's not your turn!");
     }
-    console.log(cards, 'play');
 
     this.onActionSend({
       type: 'play',
@@ -238,19 +238,35 @@ export class JouerGame {
     this.nextTurn();
   };
 
-  borrowCard = (playerId: string) => {
+  preBorrowCard = (playerId: string, card: Card) => {
     const player = this.playersManager.get(playerId);
     if (!player || player !== this.getCurrentPlayer()) {
       throw new Error("It's not your turn!");
     }
 
-    // Implement borrowing logic
-    // This might involve borrowing a card from the table
-
-    // this.handManager.updatePlayerHand(playerId, player.getHand());
-
+    this.onActionSend({
+      type: 'tryBorrow',
+      playerId,
+      ts: 1,
+      value: card.cardIndex,
+    });
     this.nextTurn();
   };
+
+  borrowCard = (cardIdx: number, inverse: boolean, targetIdx: number) => {
+    // const player = this.playersManager.get(playerId);
+    // if (!player || player !== this.getCurrentPlayer()) {
+    //   throw new Error("It's not your turn!");
+    // }
+
+   this.onActionSend({
+      type: 'borrow',
+      playerId: this.me.id,
+      ts: 1,
+      value: {cardIdx, inverse, targetIdx},
+      // value: card.cardIndex,
+    });
+  }
 
   private getCurrentPlayer = (): Player => {
     return this.playersManager.get(this.activePlayer);
@@ -345,10 +361,18 @@ export class JouerGame {
 
   handUpdate = (cards: any[]) => {
     console.log(cards, 'handUpdate');
-    this.handManager.setCards(cards.map((card, idx) => new Card(idx, card.id, card.values, card.owner, card.state)));
+    this.handManager.setCards(
+      cards.map((card, idx) => new Card(idx, card.id, card.values, card.owner, card.state, this.handManager, 'hand'))
+    );
   };
 
   tableUpdate = (cards: any[]) => {
-    this.tableManager.setCards(cards.map((card, idx) => new Card(idx, card.id, card.values, card.owner, card.state)));
+    this.tableManager.setCards(
+      cards.map((card, idx) => new Card(idx, card.id, card.values, card.owner, card.state, this.tableManager, 'table'))
+    );
   };
+
+  borrowingCardUpdate = (card: Models.CardJSON) => {
+    this.handManager.setBorrowingCard(new Card(0, card.id, card.values, card.owner, card.state, this.handManager, 'borrow'));
+  }
 }

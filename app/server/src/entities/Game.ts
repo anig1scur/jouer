@@ -7,7 +7,6 @@ export interface IGame {
   maxPlayers: number;
   mode: string;
   onWaitingStart: (message?: Models.MessageJSON) => void;
-  onLobbyStart: (message?: Models.MessageJSON) => void;
   onGameStart: (message?: Models.MessageJSON) => void;
   onGameEnd: (message?: Models.MessageJSON) => void;
 }
@@ -34,8 +33,6 @@ export class Game extends Schema {
   // Hidden fields
   private onWaitingStart: (message?: Models.MessageJSON) => void;
 
-  private onLobbyStart: (message?: Models.MessageJSON) => void;
-
   private onGameStart: (message?: Models.MessageJSON) => void;
 
   private onGameEnd: (message?: Models.MessageJSON) => void;
@@ -47,7 +44,6 @@ export class Game extends Schema {
     this.maxPlayers = attributes.maxPlayers;
     this.mode = attributes.mode;
     this.onWaitingStart = attributes.onWaitingStart;
-    this.onLobbyStart = attributes.onLobbyStart;
     this.onGameStart = attributes.onGameStart;
     this.onGameEnd = attributes.onGameEnd;
   }
@@ -139,7 +135,6 @@ export class Game extends Schema {
   startLobby() {
     this.lobbyEndsAt = Date.now() + Constants.LOBBY_DURATION;
     this.gameEndsAt = undefined;
-    this.onLobbyStart();
   }
 
   startGame() {

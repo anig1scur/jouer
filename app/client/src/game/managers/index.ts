@@ -52,17 +52,29 @@ export class BaseManager<T extends BaseEntity> extends Container {
 }
 
 export class HandManager extends BaseManager<Card> {
-  constructor() {
+  public cards: Card[] = [];
+  private borrowingCard: Card | null = null;
+  private borrowingCardReverse: Card | null = null;
+  private emptySlots: PIXI.Graphics[] = [];
+  private onSlotClickCallback: (cardIdx: number, inverse: boolean, targetIdx: number) => void;
+
+  constructor(onSlotClickCallback) {
     super('hand');
+    this.onSlotClickCallback = onSlotClickCallback;
   }
 
   emptyHand() {
     this.removeChildren();
     this.entities = {};
+    this.cards = [];
+    this.borrowingCard = null;
+    this.borrowingCardReverse = null;
+    this.emptySlots = [];
   }
 
   setCards(cards: Card[]) {
     this.emptyHand();
+    this.cards = cards;
     this.position.set(300, 500);
     const totalCards = cards.length;
     const totalAngle = Math.PI / 6;
@@ -80,6 +92,80 @@ export class HandManager extends BaseManager<Card> {
     return Object.values(this.entities).filter((card) => card.selected);
   }
 
+  setBorrowingCard(card: Card) {
+    if (this.borrowingCard) this.removeChild(this.borrowingCard.container);
+    if (this.borrowingCardReverse) this.removeChild(this.borrowingCardReverse.container);
+    this.emptySlots.forEach((slot) => this.removeChild(slot));
+
+    this.borrowingCard = card.clone();
+    console.log('borrowingCard', this.borrowingCard);
+    this.borrowingCard.container.position.set(800, -320);
+    this.addChild(this.borrowingCard.container);
+
+    // Create and position the reversed card
+    this.borrowingCardReverse = card.clone();
+    this.borrowingCardReverse.container.position.set(700, -150);
+    this.borrowingCardReverse.container.pivot.set(0, 0);
+    this.borrowingCardReverse.container.rotation = Math.PI;
+    this.addChild(this.borrowingCardReverse.container);
+
+    // Add click event listeners to the cards
+    this.borrowingCard.container.interactive = true;
+    this.borrowingCardReverse.container.interactive = true;
+    this.borrowingCard.container.on('click', () => this.selectBorrowingCard(false));
+    this.borrowingCardReverse.container.on('click', () => this.selectBorrowingCard(true));
+
+    // Initially select the normal card
+    this.selectBorrowingCard(false);
+
+    // Create empty slots between existing cards
+    this.createEmptySlots();
+  }
+
+  private selectBorrowingCard(isReverse: boolean) {
+    if (this.borrowingCard && this.borrowingCardReverse) {
+      this.borrowingCard.container.alpha = isReverse ? 0.5 : 1;
+      this.borrowingCardReverse.container.alpha = isReverse ? 1 : 0.5;
+    }
+  }
+
+  private createEmptySlots() {
+    this.emptySlots = [];
+    const totalCards = this.cards.length;
+    const totalAngle = Math.PI / 6;
+
+    for (let i = 0; i <= totalCards; i++) {
+      const slot = new PIXI.Graphics();
+      slot.fill({
+        color: 0xffffff,
+        alpha: 0.5,
+      });
+      slot.rect(-30, -40, 60, 80);
+      slot.fill();
+
+      const angleStep = totalAngle / totalCards;
+      const angle = -totalAngle / 2 + i * angleStep;
+      slot.rotation = angle;
+      slot.position.set(i * 80 - 30, Math.abs(angle) * 100);
+
+      slot.interactive = true;
+      slot.cursor = 'pointer';
+      slot.on('click', () => this.onSlotClick(i));
+
+      this.addChild(slot);
+      this.emptySlots.push(slot);
+    }
+  }
+
+  private onSlotClick(index: number) {
+    // Handle the slot click event
+    console.log(`Slot ${index} clicked`);
+    // Here you can implement the logic to insert the borrowing card
+    // into the selected position in the this.cards array
+
+    this.onSlotClickCallback(this.borrowingCard.cardIndex, this.borrowingCardReverse.container.alpha === 1, index);
+  }
+
   reverseCards() {}
 }
 
@@ -88,7 +174,17 @@ export class TableManager extends BaseManager<Card> {
     super('table');
   }
 
+  public cards: Card[] = [];
+
+  emptyTable() {
+    this.removeChildren();
+    this.entities = {};
+    this.cards = [];
+  }
+
   setCards(cards: Card[]) {
+    this.emptyTable();
+    this.cards = cards;
     this.removeChildren();
     this.position.set(500, 200);
     const totalCards = cards.length;
@@ -105,6 +201,10 @@ export class TableManager extends BaseManager<Card> {
   }
 
   reverseCards() {}
+
+  getSelectedCard() {
+    return Object.values(this.entities).find((card) => card.selected);
+  }
 }
 
 export class PlayersManager extends BaseManager<Player> {
