@@ -204,11 +204,9 @@ export default class Match extends Component<IProps, IState> {
       player.listen("hand", (curCards: any[]) => {
         this.handleCardsChange(curCards);
       })
-
       player.listen("borrowingCard", (card: Models.CardJSON) => {
-          this.game.borrowingCardUpdate(card)
+        this.game.borrowingCardUpdate(card)
       })
-
       // 没有 Add ， 全用 onChange 来 handle
       // player.hand.onAdd((card: Card, idx: number) => {
       //   this.handleCardAdd(player.hand);

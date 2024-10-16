@@ -5,7 +5,7 @@ export class Card extends Schema {
   public id: string;
 
   @type(['number'])
-  public values: number[];
+  public values: Array<number> = new Array<number>();
 
   @type('number')
   public value: number;
@@ -15,6 +15,10 @@ export class Card extends Schema {
 
   @type('string')
   public state: string;
+
+  getValues(): number[] {
+    return this.values;
+  }
 
   // Init
   constructor(id: string, values: number[], owner?: string) {

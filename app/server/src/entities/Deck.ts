@@ -92,7 +92,6 @@ export class Deck extends Schema {
     console.log('type', type1, type2)
 
     if (type1 !== type2) {
-
       return typeOrder.indexOf(type1) - typeOrder.indexOf(type2);
     }
 

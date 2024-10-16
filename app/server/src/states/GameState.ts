@@ -107,7 +107,24 @@ export class GameState extends Schema {
     });
   }
 
+  isConsecutive(cards: Card[]): boolean {
+    const hands = this.activePlayer.hand;
+    const idxes = cards.map((card) => hands.indexOf(card));
+    idxes.sort((a, b) => a - b);
+    for (let i = 1; i < idxes.length; i++) {
+      if (idxes[i] - idxes[i - 1] !== 1) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   canPlayCards(cards: Card[]): boolean {
+
+    if (!this.isConsecutive(cards)) {
+      return false;
+    }
+
     if (!this.deck.isValidPlay(cards)) {
       return false;
     }
@@ -155,11 +172,11 @@ export class GameState extends Schema {
   }
 
   playCards(playerId: string, cards: Card[]) {
+    console.log('playing', cards)
     const player = this.players.get(playerId);
     if (!player || player !== this.getCurrentPlayer()) {
       throw new Error("Not the player's turn");
     }
-
     if (this.canPlayCards(cards)) {
       player.playCards(cards);
       this.table.setCards(cards);
@@ -196,14 +213,13 @@ export class GameState extends Schema {
 
     const card = this.table.borrowCard(cardIdx);
     if (inverse) {
-      card.reverse();
+      card.values = card.values.toReversed();
     }
 
     const preOwner = this.players.get(card.owner);
     preOwner.incrementBorrowedCount();
 
     card.owner = player.id;
-
     const owner = this.players.get(player.id);
     owner.addCard(card, targetIdx);
     owner.borrowingCard = null;

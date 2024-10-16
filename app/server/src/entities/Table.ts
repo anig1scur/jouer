@@ -11,7 +11,6 @@ export class Table extends Schema {
   }
 
   canPlayCards(cards: Card[]) {
-
     return true;
   }
 
@@ -20,8 +19,8 @@ export class Table extends Schema {
   }
 
   borrowCard(cardIndex: number) {
-    const card = this.cards.splice(cardIndex, 1)[0];
-    this.setCards(this.cards.map((c) => (c ? c : null)));
+    const card = this.cards[cardIndex];
+    this.setCards(this.cards.map((c, i) => (i === cardIndex ? null : c)).filter(Boolean));
     return card;
   }
 }
