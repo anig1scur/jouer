@@ -73,6 +73,8 @@ export class Player extends Schema {
     } else {
       this.hand.push(card);
     }
+
+    console.log(this.hand.map((card) => card.id));
     this.hand = new ArraySchema<Card>(...this.hand);
     console.log('Player', this.id, 'received card', card.id);
   }

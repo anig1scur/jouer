@@ -206,7 +206,7 @@ export default class Match extends Component<IProps, IState> {
       })
 
       player.listen("borrowingCard", (card: Models.CardJSON) => {
-        this.game.borrowingCardUpdate(card)
+          this.game.borrowingCardUpdate(card)
       })
 
       // 没有 Add ， 全用 onChange 来 handle

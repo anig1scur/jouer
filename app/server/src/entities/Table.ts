@@ -20,6 +20,8 @@ export class Table extends Schema {
   }
 
   borrowCard(cardIndex: number) {
-    return this.cards.splice(cardIndex, 1)[0];
+    const card = this.cards.splice(cardIndex, 1)[0];
+    this.setCards(this.cards.map((c) => (c ? c : null)));
+    return card;
   }
 }

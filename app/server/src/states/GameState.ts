@@ -195,7 +195,9 @@ export class GameState extends Schema {
     console.log('borrowCard', playerId, cardIdx, inverse, targetIdx);
 
     const card = this.table.borrowCard(cardIdx);
-    this.table.setCards(this.table.cards.map((c) => (c ? c : null)));
+    if (inverse) {
+      card.reverse();
+    }
 
     const preOwner = this.players.get(card.owner);
     preOwner.incrementBorrowedCount();
@@ -203,7 +205,7 @@ export class GameState extends Schema {
     card.owner = player.id;
 
     const owner = this.players.get(player.id);
-    owner.addCard(card);
+    owner.addCard(card, targetIdx);
     owner.borrowingCard = null;
 
     if (card) {

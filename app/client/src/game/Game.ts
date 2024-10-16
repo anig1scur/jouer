@@ -373,6 +373,10 @@ export class JouerGame {
   };
 
   borrowingCardUpdate = (card: Models.CardJSON) => {
-    this.handManager.setBorrowingCard(new Card(0, card.id, card.values, card.owner, card.state, this.handManager, 'borrow'));
+    if (!card) {
+      return;
+    }
+    const idx = this.tableManager.cards.findIndex((c) => c.id === card.id);
+    this.handManager.setBorrowingCard(new Card(idx, card.id, card.values, card.owner, card.state, this.handManager, 'borrow'));
   }
 }
