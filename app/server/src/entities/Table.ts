@@ -1,21 +1,22 @@
-import {Schema, type} from '@colyseus/schema';
+import {ArraySchema,Schema, type} from '@colyseus/schema';
 import {Player} from './Player';
 import {Card} from './Card';
 
 export class Table extends Schema {
   @type([Card])
-  public cards: Card[];
+  public cards: ArraySchema<Card> = new ArraySchema<Card>();
 
   constructor() {
     super();
   }
 
   canPlayCards(cards: Card[]) {
+
     return true;
   }
 
-  addCards(cards: Card[]) {
-    this.cards = cards;
+  setCards(cards: Card[]) {
+    this.cards = new ArraySchema<Card>(...cards);
   }
 
   borrowCard(player: Player, cardId: string): Card {

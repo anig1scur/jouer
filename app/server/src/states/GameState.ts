@@ -108,6 +108,21 @@ export class GameState extends Schema {
     });
   }
 
+  canPlayCards(cards: Card[]): boolean {
+
+    if (!this.deck.isValidPlay(cards)) {
+      return false;
+    }
+    if (!this.table.cards || this.table.cards.length === 0) {
+      return true;
+    }
+
+    if (!this.deck.biggerThan(cards, [...this.table.cards])) {
+      return false;
+    }
+    return true;
+  }
+
   playerAdd(id: string, name: string) {
     if (this.players.size >= this.game.maxPlayers) {
       throw new Error('Maximum number of players reached');
@@ -142,18 +157,21 @@ export class GameState extends Schema {
   }
 
   playCards(playerId: string, cards: Card[]) {
-    console.log('playCards', playerId, cards);
     const player = this.players.get(playerId);
     if (!player || player !== this.getCurrentPlayer()) {
       throw new Error("Not the player's turn");
     }
 
-    if (this.table.canPlayCards(cards)) {
+    if (this.canPlayCards(cards)) {
       player.playCards(cards);
-      this.table.addCards(cards);
+      this.table.setCards(cards);
       this.nextTurn();
     } else {
-      throw new Error('Invalid play');
+      // throw new Error('Invalid play');
+      console.log('invalid play')
+      this.messages.push(
+        'Invalid play'
+      )
     }
   }
 

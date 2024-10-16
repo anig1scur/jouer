@@ -58,7 +58,7 @@ export class Game extends Schema {
       case 'waiting':
         this.updateWaiting(players);
         break;
-      case 'waiting':
+      case 'awarding':
         this.updateLobby(players);
         break;
       case 'playing':

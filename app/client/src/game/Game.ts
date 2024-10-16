@@ -167,10 +167,8 @@ export class JouerGame {
     if (!player || player !== this.getCurrentPlayer()) {
       throw new Error("It's not your turn!");
     }
-    if (!this.isValidPlay(cards)) {
-      throw new Error('Invalid play!');
-    }
     console.log(cards, 'play');
+
     this.onActionSend({
       type: 'play',
       playerId,
@@ -179,11 +177,9 @@ export class JouerGame {
     });
   };
 
-  isSequence(cards: Card[]): boolean {
-    const cardValues = cards.map((card) => card.value);
-
-    for (let i = 1; i < cardValues.length; i++) {
-      if (cardValues[i] !== cardValues[i - 1] + 1 || cardValues[i] !== cardValues[i - 1] + 1) {
+  isSequence(values: number[]): boolean {
+    for (let i = 1; i < values.length; i++) {
+      if (values[i] !== values[i - 1] + 1 || values[i] !== values[i - 1] + 1) {
         return false;
       }
     }
@@ -199,19 +195,19 @@ export class JouerGame {
       return false;
     }
 
-    const sortedCards = cards.slice().sort((a, b) => a.cardIndex - b.cardIndex);
-    for (let i = 1; i < sortedCards.length; i++) {
-      if (sortedCards[i].cardIndex !== sortedCards[i - 1].cardIndex + 1) {
-        return false;
-      }
-    }
+    const hand = this.getCurrentPlayer().getHand();
+    const idxes = cards.map((card) => hand.findIndex((c) => c.id === card.id));
 
+    if (!this.isSequence(idxes)) {
+      return false;
+    }
+    const values = cards.map((card) => card.value);
     if (cards.length === 1) {
       return true;
     } else if (cards.length > 1) {
       if (cards.every((card) => card.value === cards[0].value)) {
         return true;
-      } else if (this.isSequence(cards)) {
+      } else if (this.isSequence(values)) {
         return true;
       }
     }
@@ -338,7 +334,7 @@ export class JouerGame {
 
   activePlayerUpdate = (playerId: string) => {
     this.activePlayer = playerId;
-    if (this.activePlayer === this.me.id) {
+    if (playerId === this.me?.id) {
       this.actionManager.show();
       this.actionManager.setActions(['borrow', 'jouer', 'play']);
       this.bindActionCallbacks();
@@ -348,6 +344,7 @@ export class JouerGame {
   };
 
   handUpdate = (cards: any[]) => {
+    console.log(cards, 'handUpdate');
     this.handManager.setCards(cards.map((card, idx) => new Card(idx, card.id, card.values, card.owner, card.state)));
   };
 

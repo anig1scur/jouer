@@ -192,6 +192,7 @@ export default class Match extends Component<IProps, IState> {
   };
 
   handleTableChange = (cards: Card[]) => {
+    console.log(cards, "tableUpdate")
     this.game.tableUpdate(cards);
   }
 
@@ -272,8 +273,6 @@ export default class Match extends Component<IProps, IState> {
   // METHODS
   isPlayerIdMe = (playerId: string) => {
     return this.room.sessionId === playerId;
-
-    // return this.state.hud.playerId === playerId;
   };
 
   updateRoom = () => {

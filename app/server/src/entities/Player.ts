@@ -56,6 +56,7 @@ export class Player extends Schema {
   }
 
   addCard(card: Card): void {
+    card.owner = this.id;
     if (card.isFirstHandCard()) {
       this.firstHand = true;
       this.status = Models.PlayerStatus.thinking;
@@ -67,11 +68,9 @@ export class Player extends Schema {
   playCards(cards: Card[]): void {
     console.log(this.hand, 'playing !');
 
-    const cardIdsToRemove = new Set(cards.map(card => card.id));
+    const cardIdsToRemove = new Set(cards.map((card) => card.id));
 
-    this.hand = new ArraySchema<Card>(
-      ...this.hand.filter(card => !cardIdsToRemove.has(card.id))
-    );
+    this.hand = new ArraySchema<Card>(...this.hand.filter((card) => !cardIdsToRemove.has(card.id)));
   }
 
   borrowCard(card: Card, idx: number): void {

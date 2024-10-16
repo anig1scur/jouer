@@ -11,17 +11,18 @@ export class Card extends Schema {
   public value: number;
 
   @type('string')
-  public owner: string | null;
+  public owner?: string;
 
   @type('string')
   public state: string;
 
   // Init
-  constructor(id: string, values: number[]) {
+  constructor(id: string, values: number[], owner?: string) {
     super();
     this.id = id;
     this.values = values;
-    this.owner = null;
+    this.value = values[0];
+    this.owner = owner;
     this.state = 'in_deck';
   }
 
@@ -32,5 +33,6 @@ export class Card extends Schema {
 
   reverse() {
     this.values.reverse();
+    this.value = this.values[0];
   }
 }

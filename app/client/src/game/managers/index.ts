@@ -56,8 +56,13 @@ export class HandManager extends BaseManager<Card> {
     super('hand');
   }
 
-  setCards(cards: Card[]) {
+  emptyHand() {
     this.removeChildren();
+    this.entities = {};
+  }
+
+  setCards(cards: Card[]) {
+    this.emptyHand();
     this.position.set(300, 500);
     const totalCards = cards.length;
     const totalAngle = Math.PI / 6;
@@ -170,6 +175,7 @@ export class ActionManager extends BaseManager<ActionButton> {
   setActions(actions: Models.ActionType[]) {
     this.removeChildren();
     this.entities = {};
+    this.container.zIndex = this.zIndex;
 
     actions.forEach((action, index) => {
       const button = new ActionButton(action);
@@ -178,9 +184,8 @@ export class ActionManager extends BaseManager<ActionButton> {
       this.addChild(button.container);
     });
 
-    // Center the action buttons
     const totalWidth = actions.length * 140 - 20;
-    this.position.set(screen.width / 2 - totalWidth / 2, screen.height - 100);
+    this.position.set(screen.width / 2 - totalWidth / 2, 900);
   }
 
   bindHandler(action: Models.ActionType, handler: () => void) {

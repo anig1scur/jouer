@@ -40,13 +40,20 @@ export class GameRoom extends Room<GameState> {
         case 'play':
           this.state.playCards(
             playerId,
-            this.state.player.hand.map((card, i) => message.value.includes(i) && card).filter(Boolean)
+            this.state.player.hand
+              .map(
+                (card, i) =>
+                  message.value
+                    .split(',')
+                    .map((x) => Number(x))
+                    .includes(i) && card
+              )
+              .filter(Boolean)
           );
           break;
         case 'ready':
           const player = this.state.players.get(client.sessionId);
           player.ready = true;
-          console.log("readyreadyready")
           if (this.state.players.size === this.state.game.maxPlayers && this.allPlayersReady()) {
             this.state.startGame();
           }
