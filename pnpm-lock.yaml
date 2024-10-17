@@ -108,11 +108,11 @@ importers:
         specifier: ^0.15.8
         version: 0.15.8
       '@colyseus/schema':
-        specifier: ^2.0.35
-        version: 2.0.35
+        specifier: git+ssh://git@github.com/anig1scur/schema.git
+        version: github.com/anig1scur/schema/bad85f7023acb5a1e0bd5842549cd1badc251054
       colyseus:
         specifier: ^0.15.17
-        version: 0.15.17(@colyseus/schema@2.0.35)(express@4.21.1)
+        version: 0.15.17(@colyseus/schema@2.0.36)(express@4.21.1)
       compression:
         specifier: ^1.7.4
         version: 1.7.4
@@ -204,13 +204,13 @@ packages:
     hasBin: true
     dev: false
 
-  /@colyseus/ws-transport@0.15.2(@colyseus/schema@2.0.35):
+  /@colyseus/ws-transport@0.15.2(@colyseus/schema@2.0.36):
     resolution: {integrity: sha512-v83omTcAmU+vm3uqaaPFDXHxs4tYXUgJwR4IviZF0UMCm3OIQ85end+vsHaKGQf+wSfincCKGkA1etwxqlWTLQ==}
     peerDependencies:
       '@colyseus/schema': '>=1.0.0'
     dependencies:
       '@colyseus/core': 0.15.52
-      '@colyseus/schema': 2.0.35
+      '@colyseus/schema': github.com/anig1scur/schema/bad85f7023acb5a1e0bd5842549cd1badc251054
       '@types/ws': 7.4.7
       ws: 7.5.10
     transitivePeerDependencies:
@@ -737,7 +737,7 @@ packages:
       - utf-8-validate
     dev: false
 
-  /colyseus@0.15.17(@colyseus/schema@2.0.35)(express@4.21.1):
+  /colyseus@0.15.17(@colyseus/schema@2.0.36)(express@4.21.1):
     resolution: {integrity: sha512-9RDi8fbikCQ8tb9ptNQ0MBsP3dOR9ltxQGhkg6f0RGnQ+tkzcXEfwtIuO6nbGJm75bmSFPmRH40uoG6qlvBlIw==}
     engines: {node: '>= 14.x'}
     dependencies:
@@ -745,7 +745,7 @@ packages:
       '@colyseus/core': 0.15.52
       '@colyseus/redis-driver': 0.15.6
       '@colyseus/redis-presence': 0.15.5
-      '@colyseus/ws-transport': 0.15.2(@colyseus/schema@2.0.35)
+      '@colyseus/ws-transport': 0.15.2(@colyseus/schema@2.0.36)
     transitivePeerDependencies:
       - '@colyseus/schema'
       - bufferutil
@@ -2366,3 +2366,10 @@ packages:
     resolution: {integrity: sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==}
     engines: {node: '>=6'}
     dev: true
+
+  github.com/anig1scur/schema/bad85f7023acb5a1e0bd5842549cd1badc251054:
+    resolution: {tarball: https://codeload.github.com/anig1scur/schema/tar.gz/bad85f7023acb5a1e0bd5842549cd1badc251054}
+    name: '@colyseus/schema'
+    version: 2.0.36
+    hasBin: true
+    dev: false

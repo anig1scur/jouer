@@ -2,13 +2,14 @@ import {Application, Container, Texture, Sprite, Text} from 'pixi.js';
 import {Player} from './entities/Player';
 import {Card, Hand} from './entities/Card';
 import {Models} from '@jouer/common/src';
-import {HandManager, PlayersManager, TableManager, ActionManager} from './managers';
+import {HandManager, PlayersManager, TableManager, ActionManager, MessageManager} from './managers';
 
 const ZINDEXES = {
   TABLE: 1,
   CARDS: 2,
   PLAYERS: 3,
   UI: 4,
+  MESSAGES: 5,
 };
 
 export interface Stats {
@@ -56,6 +57,7 @@ export class JouerGame {
   private tableManager: TableManager;
   private playersManager: PlayersManager;
   private actionManager: ActionManager;
+  private messageManager: MessageManager;
 
   private onActionSend: (action: Models.ActionJSON) => void;
 
@@ -126,6 +128,10 @@ export class JouerGame {
     this.actionManager = new ActionManager();
     this.actionManager.zIndex = ZINDEXES.UI;
     this.app.stage.addChild(this.actionManager);
+
+    this.messageManager = new MessageManager();
+    this.messageManager.zIndex = ZINDEXES.MESSAGES;
+    this.app.stage.addChild(this.messageManager);
 
     this.onActionSend = onActionSend;
   }

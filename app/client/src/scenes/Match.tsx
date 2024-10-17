@@ -132,6 +132,7 @@ export default class Match extends Component<IProps, IState> {
     // Listen for state changes
     this.room.state.game.onChange(this.handleGameChange);
     this.room.state.players.onAdd(this.handlePlayerAdd);
+    this.room.state.messages.onAdd(this.handleMessage);
     this.room.state.table.listen("cards", this.handleTableChange);
     this.room.state.listen("activePlayerId", this.handleActivePlayerChange);
     // this.room.state.players.onChange(this.handlePlayerUpdate);

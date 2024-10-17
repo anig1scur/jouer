@@ -28,13 +28,13 @@
         "@types/node": "^22.7.5",
         "@types/querystringify": "^2.0.2",
         "@types/rbush": "^4.0.0",
+        "@types/react": "^18.3.11",
         "concurrently": "^9.0.1",
         "esbuild": "^0.14.25",
         "esbuild-plugin-alias": "^0.2.1",
         "nodemon": "^3.1.7",
         "prettier": "^3.3.3",
         "ts-node": "^10.9.2",
-        "typescript": "^5.6.3",
-        "@types/react": "^18.3.11"
+        "typescript": "^5.6.3"
     }
 }

@@ -10,16 +10,14 @@ export class Player extends Schema {
   @type('string')
   public name: string;
 
-  @filter(function (this: Player, client: Client, value: ArraySchema<Card>) {
-    if (client.sessionId === this.id) {
-      // console.log(
-      //   "Player's session ID:",
-      //   client.sessionId,
-      //   this.hand.map((card) => card.id)
-      // );
-    }
-    return client.sessionId === this.id;
-  })
+  // 暂时注释掉， filter 会导致 borrow 的牌重新发到 table 时其他 player 看不见
+  // @filter(function (this: Player, client: Client, value: ArraySchema<Card>) {
+  //   if (this.borrowingCard) {
+  //     console.log("borrowingCard filter", this.borrowingCard.id, value.map((card) => card.id));
+  //     return true;
+  //   }
+  //   return client.sessionId === this.id;
+  // })
   @type([Card])
   public hand: ArraySchema<Card> = new ArraySchema<Card>();
 
@@ -72,23 +70,13 @@ export class Player extends Schema {
     console.log('inserting card', ...card.values);
 
     // colyseus schema 有 bug ，会丢失 idx 后的一个元素
-    // if (idx !== undefined) {
-    //   this.hand.splice(idx, 0, card);
-    // } else {
-    //   this.hand.push(card);
-    // }
-
-    // 将 this.hand 转换为普通数组进行操作
-    let tempHand = [...this.hand];
-
     if (idx !== undefined) {
-      tempHand.splice(idx, 0, card);
+      this.hand.splice(idx, 0, card);
     } else {
-      tempHand.push(card);
+      this.hand.push(card);
     }
 
-    // 操作完成后，重新创建 ArraySchema
-    this.hand = new ArraySchema<Card>(...tempHand);
+    this.hand = new ArraySchema<Card>(...this.hand);
 
     console.log('Player', this.id, 'received card', card.id);
   }

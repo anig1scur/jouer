@@ -295,3 +295,93 @@ export class ActionManager extends BaseManager<ActionButton> {
     }
   }
 }
+
+class Message extends BaseEntity {
+  private text: PIXI.Text;
+
+  constructor(content: string) {
+    super();
+    this.text = new PIXI.Text({
+      text: content,
+      style: {
+        fontFamily: 'Arial',
+        fontSize: 14,
+        fill: 0xffffff,
+        wordWrap: true,
+        wordWrapWidth: 380,
+      },
+    });
+  }
+
+  getText() {
+    return this.text;
+  }
+}
+
+export class MessageManager extends BaseManager<Message> {
+  private maxMessages: number;
+  private messageContainer: Container;
+  public mask: PIXI.Graphics;
+
+  constructor() {
+    super('MessageManager');
+
+    this.maxMessages = 30;
+    this.messageContainer = new Container();
+    this.container = new Container();
+    this.container.addChild(this.messageContainer);
+
+    // Create a mask for scrolling
+    this.mask = new PIXI.Graphics();
+    this.mask.fill(0xffffff);
+    this.mask.rect(0, 0, 400, 250);
+    this.mask.fill();
+    this.messageContainer.mask = this.mask;
+    this.container.addChild(this.mask);
+
+    // Set position to top-right corner
+    this.container.position.set(window.innerWidth - 420, 20);
+
+    // Enable scrolling
+    this.container.interactive = true;
+    this.container.on('wheel', this.onScroll.bind(this));
+  }
+
+  addMessage(content: string) {
+    if (Object.keys(this.entities).length >= this.maxMessages) {
+      // Remove the oldest message
+      const oldestMessageKey = Object.keys(this.entities)[0];
+      const oldestMessage = this.entities[oldestMessageKey];
+      this.messageContainer.removeChild(oldestMessage.getText());
+      delete this.entities[oldestMessageKey];
+    }
+
+    const message = new Message(content);
+    const messageText = message.getText();
+    messageText.position.set(10, Object.keys(this.entities).length * 20);
+    this.messageContainer.addChild(messageText);
+    this.entities[content] = message;
+
+    // Adjust position of all messages
+    this.adjustMessagePositions();
+  }
+
+  private adjustMessagePositions() {
+    let yPos = 0;
+    for (const key in this.entities) {
+      const message = this.entities[key];
+      message.getText().position.y = yPos;
+      yPos += 20;
+    }
+  }
+
+  private onScroll(event: WheelEvent) {
+    const delta = event.deltaY > 0 ? -20 : 20;
+    this.messageContainer.y += delta;
+
+    // Ensure the container stays within bounds
+    this.messageContainer.y = Math.min(0, this.messageContainer.y);
+    const maxScroll = Math.max(0, this.messageContainer.height - 250);
+    this.messageContainer.y = Math.max(-maxScroll, this.messageContainer.y);
+  }
+}

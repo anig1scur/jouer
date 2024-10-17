@@ -172,7 +172,7 @@ export class GameState extends Schema {
   }
 
   playCards(playerId: string, cards: Card[]) {
-    console.log('playing', cards)
+    console.log('playing', cards.map((card) => card.values));
     const player = this.players.get(playerId);
     if (!player || player !== this.getCurrentPlayer()) {
       throw new Error("Not the player's turn");
@@ -213,7 +213,7 @@ export class GameState extends Schema {
 
     const card = this.table.borrowCard(cardIdx);
     if (inverse) {
-      card.values = card.values.toReversed();
+      card.reverse();
     }
 
     const preOwner = this.players.get(card.owner);
@@ -223,6 +223,7 @@ export class GameState extends Schema {
     const owner = this.players.get(player.id);
     owner.addCard(card, targetIdx);
     owner.borrowingCard = null;
+    this.table.update();
 
     if (card) {
       this.nextTurn();
