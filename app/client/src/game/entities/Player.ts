@@ -6,7 +6,7 @@ import BoardBg from '../assets/boardBg.png';
 import {AssetsLoader} from '../../utils/pixitool';
 import {Card} from './Card';
 import {Models} from '@jouer/common/src';
-import { BaseEntity } from '.';
+import {BaseEntity} from '.';
 
 class StatsBoard extends PIXI.Container {
   private cardCount: number;
@@ -93,7 +93,7 @@ export class Player extends BaseEntity {
   private assetsLoader: AssetsLoader;
   private hand: Card[] = [];
 
-  constructor(id:string, name: string, cardCount: number, score: number) {
+  constructor(id: string, name: string, cardCount: number, score: number) {
     super();
 
     this.id = id;

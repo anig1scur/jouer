@@ -1,14 +1,12 @@
-import { Inline, Space, Text, View } from '../../components';
-import React, { CSSProperties, Fragment } from 'react';
+import React, { Fragment } from 'react';
 import { Models } from '@jouer/common';
-
+import Draggable from 'react-draggable';
 /**
  * Render the messages from the server.
  */
 export const Messages = React.memo(
   (props: { messages: Models.MessageJSON[] }): React.ReactElement | null => {
     const { messages } = props;
-
     if (!messages.length) {
       return null;
     }
@@ -16,14 +14,13 @@ export const Messages = React.memo(
     console.log("messages", messages);
 
     return (
-      <>
-        { messages.map((message, index) => (
-          <Fragment key={ index }>
+      <Draggable>
+        <div className='absolute w-52 max-h-36 top-2 right-3 cursor-move rounded-xl backdrop-blur-md shadow p-3 bg-[#DC905A] bg-opacity-20'>
+          { messages.map((message, index) => (
             <Message key={ message.ts } message={ message } />
-            { messages.length > 1 && index < messages.length - 1 ? <Space size="xs" /> : null }
-          </Fragment>
-        )) }
-      </>
+          )) }
+        </div>
+      </Draggable>
     );
   },
 );
@@ -35,11 +32,17 @@ function Message(props: { message: Models.MessageJSON }): React.ReactElement {
   const { message } = props;
 
   return (
-    <div>
-      <div>{ `${ message.from }:` }</div>
-      <div>{ getFormattedMessage(message) }</div>
+    <div className='text-[#ffeec7] flex gap-2 items-center'>
+      <div className='text-sm font-semibold text-opacity-80'>{ getMMSSFromTimestamp(message.ts) }</div>
+      {/* <div className="text-sm font-semibold text-opacity-80">{ `[${ message.from }]` }</div> */ }
+      <div className="text-base text-[#7A501F]">{ getFormattedMessage(message) }</div>
     </div>
   );
+}
+
+function getMMSSFromTimestamp(timestamp: number): string {
+  const date = new Date(timestamp);
+  return date.toTimeString().slice(0, 5);
 }
 
 function getFormattedMessage(message: Models.MessageJSON): string {
@@ -62,3 +65,4 @@ function getFormattedMessage(message: Models.MessageJSON): string {
       return '';
   }
 }
+

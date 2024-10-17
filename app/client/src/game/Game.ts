@@ -310,13 +310,13 @@ export class JouerGame {
   playerAdd = (playerId: string, attributes: Models.PlayerJSON, isMe: boolean) => {
     const player = new Player(attributes.id, attributes.name, attributes.cardCount, attributes.score);
 
-    console.log(player, attributes, 'add');
     this.playersManager.add(player.id, player);
 
     if (isMe) {
       this.me = player;
     }
 
+    // TODO: ready button
     this.onActionSend({
       type: 'ready',
       playerId,

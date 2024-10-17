@@ -5,7 +5,7 @@ import { Constants, Models, Types } from '@jouer/common';
 
 import { JouerGame as Game } from '../game/Game';
 import qs from 'querystringify';
-import { Messages } from "./HUD/Messages";
+import { Messages, Players } from "./HUD";
 import { Card } from '../game/entities/Card';
 
 interface IProps {
@@ -23,6 +23,7 @@ export interface HUDProps {
   playersMaxCount: number;
   messages: Models.MessageJSON[];
   announce?: string;
+  me?: Models.PlayerJSON;
 }
 
 interface IState {
@@ -189,7 +190,6 @@ export default class Match extends Component<IProps, IState> {
   handlePlayerAdd = (player: any, playerId: string) => {
     const isMe = this.isPlayerIdMe(playerId);
     this.game.playerAdd(playerId, player, isMe);
-    // this.updateRoom();
     if (isMe) {
       player.listen("hand", (curCards: any[]) => {
         this.handleCardsChange(curCards);
@@ -197,10 +197,6 @@ export default class Match extends Component<IProps, IState> {
       player.listen("borrowingCard", (card: Models.CardJSON) => {
         this.game.borrowingCardUpdate(card)
       })
-      // 没有 Add ， 全用 onChange 来 handle
-      // player.hand.onAdd((card: Card, idx: number) => {
-      //   this.handleCardAdd(player.hand);
-      // })
     }
   };
 
@@ -221,7 +217,6 @@ export default class Match extends Component<IProps, IState> {
   handleMessage = (type: any, message: Models.MessageJSON) => {
     const { messages } = this.state.hud;
 
-    console.log(message, "message")
     let announce: string | undefined;
     switch (type) {
       case 'waiting':
@@ -292,6 +287,7 @@ export default class Match extends Component<IProps, IState> {
         <title>{ `${ hud.roomName || hud.gameMode } [${ hud.playersCount }]` }</title>
         <div ref={ this.canvasRef } />
         <Messages messages={ hud.messages } />
+        <Players players={ hud.players } me={hud.messages} />
       </>
     );
   }
