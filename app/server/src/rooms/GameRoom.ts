@@ -43,25 +43,10 @@ export class GameRoom extends Room<GameState> {
           console.log(`${new Date().toISOString()} [Message] id=${playerId} type=${type}`);
           break;
         case 'play':
-          this.state.playCards(
-            playerId,
-            this.state.activePlayer.hand
-              .map(
-                (card, i) =>
-                  message.value
-                    .split(',')
-                    .map((x) => Number(x))
-                    .includes(i) && card
-              )
-              .filter(Boolean)
-          );
+          this.onPlay(client, message);
           break;
         case 'ready':
-          const player = this.state.players.get(client.sessionId);
-          player.ready = true;
-          if (this.state.players.size === this.state.game.maxPlayers && this.allPlayersReady()) {
-            this.state.startGame();
-          }
+          this.onReady(client);
           break;
         default:
           break;
@@ -69,16 +54,41 @@ export class GameRoom extends Room<GameState> {
     });
   }
 
+  onPlay(client: Client, message: Models.ActionJSON) {
+    const playerId = client.sessionId;
+    this.state.playCards(
+      playerId,
+      this.state.activePlayer.hand
+        .map(
+          (card, i) =>
+            message.value
+              .split(',')
+              .map((x) => Number(x))
+              .includes(i) && card
+        )
+        .filter(Boolean)
+    );
+  }
+
+  onReady(client: Client) {
+    const player = this.state.players.get(client.sessionId);
+    player.ready = true;
+    if (this.state.game.isWaiting) {
+      if (this.state.players.size === this.state.game.maxPlayers && this.allPlayersReady()) {
+        console.log(`${new Date().toISOString()} [Ready] id=${client.sessionId} player=${player.name}`);
+        this.state.startGame();
+      }
+    }
+  }
+
   onJoin(client: Client, options: Types.IPlayerOptions) {
     console.log(`${new Date().toISOString()} [Join] id=${client.sessionId} player=${options.playerName}`);
     this.state.playerAdd(client.sessionId, options.playerName);
-    this.state.messages.push(`Player ${options.playerName} joined the game`);
   }
 
   onLeave(client: Client) {
     console.log(`${new Date().toISOString()} [Leave] id=${client.sessionId}`);
     this.state.playerRemove(client.sessionId);
-    this.state.messages.push(`Player ${this.state.players[client.sessionId].name} left the game`);
   }
 
   allPlayersReady() {

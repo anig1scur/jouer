@@ -83,6 +83,7 @@ class StatsBoard extends PIXI.Container {
 export class Player extends BaseEntity {
   public id: string;
   public name: string;
+  public ready: boolean;
   public score: number = 0;
   public jouerCount: number = 0;
   public cardCount: number = 0;

@@ -10,17 +10,13 @@ export class GameState extends Schema {
   @type({map: Player})
   public players: MapSchema<Player> = new MapSchema<Player>();
 
-  @type(Deck)
-  public deck: Deck;
-
   @type(Table)
   public table: Table;
 
-  @type(['string'])
-  public messages: ArraySchema<string> = new ArraySchema<string>();
-
   @type('string')
   public activePlayerId: string = '';
+
+  public deck: Deck;
 
   get activePlayer(): Player {
     return this.players.get(this.activePlayerId);
@@ -33,9 +29,9 @@ export class GameState extends Schema {
 
     this.onMessage = onMessage;
     this.game = new Game({
+      mode: 'jouer',
       roomName,
       maxPlayers,
-      mode: 'jouer',
       onWaitingStart: this.handleWaitingStart,
       onGameStart: this.handleGameStart,
       onGameEnd: this.handleGameEnd,
@@ -46,17 +42,11 @@ export class GameState extends Schema {
   }
 
   update() {
-    // this.updateGameState();
-    // if (this.state === 'playing') {
-    //   this.updateGameState();
-    // }
+    this.updateGame();
   }
 
-  private updateGameState() {
-    const currentPlayer = this.getCurrentPlayer();
-    if (currentPlayer.cardCount === 0) {
-      this.endGame(currentPlayer);
-    }
+  private updateGame() {
+    this.game.update(this.players);
   }
 
   startGame() {
@@ -64,15 +54,8 @@ export class GameState extends Schema {
       throw new Error('Not enough players to start the game');
     }
 
-    console.log('startGame');
+    this.game.startGame();
     this.initCards();
-
-    this.onMessage({
-      type: 'start',
-      from: 'server',
-      ts: Date.now(),
-      params: {},
-    });
   }
 
   get playerCount(): number {
@@ -120,7 +103,6 @@ export class GameState extends Schema {
   }
 
   canPlayCards(cards: Card[]): boolean {
-
     if (!this.isConsecutive(cards)) {
       return false;
     }
@@ -152,10 +134,6 @@ export class GameState extends Schema {
       ts: Date.now(),
       params: {name: name},
     });
-
-    // if (this.players.size === this.game.maxPlayers) {
-    //   this.startGame();
-    // }
   }
 
   playerRemove(id: string) {
@@ -172,7 +150,10 @@ export class GameState extends Schema {
   }
 
   playCards(playerId: string, cards: Card[]) {
-    console.log('playing', cards.map((card) => card.values));
+    console.log(
+      'playing',
+      cards.map((card) => card.values)
+    );
     const player = this.players.get(playerId);
     if (!player || player !== this.getCurrentPlayer()) {
       throw new Error("Not the player's turn");
@@ -184,7 +165,6 @@ export class GameState extends Schema {
     } else {
       // throw new Error('Invalid play');
       console.log('invalid play');
-      this.messages.push('Invalid play');
     }
   }
 
@@ -201,7 +181,6 @@ export class GameState extends Schema {
       throw new Error('Cannot borrow this card');
     }
   }
-
 
   borrowCard(playerId: string, cardIdx: number, inverse: boolean, targetIdx: number) {
     const player = this.players.get(playerId);
@@ -243,7 +222,6 @@ export class GameState extends Schema {
   }
 
   private endGame(winner: Player) {
-    this.game.state = 'awarding';
     this.onMessage({
       type: 'stop',
       from: 'server',

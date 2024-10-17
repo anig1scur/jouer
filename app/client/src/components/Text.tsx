@@ -7,6 +7,7 @@ export function Text(props: { children: React.ReactNode; style?: CSSProperties }
 
   return (
     <p
+    className='text'
       style={ {
         ...TEXT,
         ...style,

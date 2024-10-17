@@ -10,7 +10,7 @@ export class Player extends Schema {
   @type('string')
   public name: string;
 
-  // 暂时注释掉， filter 会导致 borrow 的牌重新发到 table 时其他 player 看不见
+  // 暂时注释掉， filter 会导致 borrow 的牌重新发到 table 时其他 player 看不见...
   // @filter(function (this: Player, client: Client, value: ArraySchema<Card>) {
   //   if (this.borrowingCard) {
   //     console.log("borrowingCard filter", this.borrowingCard.id, value.map((card) => card.id));

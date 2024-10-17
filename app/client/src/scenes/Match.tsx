@@ -4,8 +4,8 @@ import React, { Component, RefObject } from 'react';
 import { Constants, Models, Types } from '@jouer/common';
 
 import { JouerGame as Game } from '../game/Game';
-import { Helmet } from 'react-helmet';
 import qs from 'querystringify';
+import { Messages } from "./HUD/Messages";
 import { Card } from '../game/entities/Card';
 
 interface IProps {
@@ -18,8 +18,6 @@ export interface HUDProps {
   roomName: string;
   playerId: string;
   playerName: string;
-  playerLives: number;
-  playerMaxLives: number;
   players: Models.PlayerJSON[];
   playersCount: number;
   playersMaxCount: number;
@@ -57,8 +55,6 @@ export default class Match extends Component<IProps, IState> {
         roomName: '',
         playerId: '',
         playerName: '',
-        playerLives: 0,
-        playerMaxLives: 0,
         players: [],
         playersCount: 0,
         playersMaxCount: 0,
@@ -130,10 +126,9 @@ export default class Match extends Component<IProps, IState> {
     }));
 
     // Listen for state changes
-    this.room.state.game.onChange(this.handleGameChange);
     this.room.state.players.onAdd(this.handlePlayerAdd);
-    this.room.state.messages.onAdd(this.handleMessage);
     this.room.state.table.listen("cards", this.handleTableChange);
+    this.room.state.listen("game", this.handleGameChange);
     this.room.state.listen("activePlayerId", this.handleActivePlayerChange);
     // this.room.state.players.onChange(this.handlePlayerUpdate);
     this.room.state.players.onRemove(this.handlePlayerRemove);
@@ -142,7 +137,7 @@ export default class Match extends Component<IProps, IState> {
     this.room.onMessage('*', this.handleMessage);
 
     // Start game
-    this.game.start();
+    this.game.start(this.canvasRef.current as HTMLDivElement);
 
     // Listen for inputs
     window.addEventListener('resize', this.handleWindowResize);
@@ -181,14 +176,8 @@ export default class Match extends Component<IProps, IState> {
     this.game.activePlayerUpdate(playerId);
   }
 
-  handleGameChange = (attributes: any, k) => {
-    if (!attributes) {
-      return;
-    }
-    console.log(attributes);
-    for (const row of attributes) {
-      this.game.gameUpdate(row.field, row.value);
-    }
+  handleGameChange = (newGame: any) => {
+    this.game.gameUpdate(newGame);
   };
 
   handleTableChange = (cards: Card[]) => {
@@ -232,6 +221,7 @@ export default class Match extends Component<IProps, IState> {
   handleMessage = (type: any, message: Models.MessageJSON) => {
     const { messages } = this.state.hud;
 
+    console.log(message, "message")
     let announce: string | undefined;
     switch (type) {
       case 'waiting':
@@ -253,7 +243,6 @@ export default class Match extends Component<IProps, IState> {
     this.setState((prev) => ({
       hud: {
         ...prev.hud,
-        // Only set the last n messages (negative value on slice() is reverse)
         messages: [...messages, message].slice(-Constants.LOG_LINES_MAX),
         announce,
       },
@@ -299,9 +288,11 @@ export default class Match extends Component<IProps, IState> {
     const { hud } = this.state;
 
     return (
-      <Helmet>
+      <>
         <title>{ `${ hud.roomName || hud.gameMode } [${ hud.playersCount }]` }</title>
-      </Helmet>
+        <div ref={ this.canvasRef } />
+        <Messages messages={ hud.messages } />
+      </>
     );
   }
 }

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
 import { Client } from 'colyseus.js';
 import qs from 'querystringify';
 import {
@@ -31,7 +30,7 @@ const Home: React.FC = () => {
   const [hasNameChanged, setHasNameChanged] = useState(false);
   const [isNewRoom, setIsNewRoom] = useState(false);
   const [roomName, setRoomName] = useState(localStorage.getItem('roomName') || '');
-  const [roomMaxPlayers, setRoomMaxPlayers] = useState(PlayersCountList[0].value);
+  const [roomMaxPlayers, setRoomMaxPlayers] = useState(PlayersCountList[0].value as number);
   const [mode, setMode] = useState('');
   const [rooms, setRooms] = useState<Array<RoomAvailable<any>>>([]);
   const [client, setClient] = useState<Client | null>(null);
@@ -146,7 +145,7 @@ const Home: React.FC = () => {
             value={ roomMaxPlayers }
             values={ PlayersCountList }
             onChange={ (event: React.ChangeEvent<HTMLSelectElement>) => {
-              setRoomMaxPlayers(event.target.value);
+              setRoomMaxPlayers(Number(event.target.value));
             } }
           />
           <Space size="s" />
@@ -199,14 +198,6 @@ const Home: React.FC = () => {
 
   return (
     <View flex center style={ { padding: 32, flexDirection: 'column' } }>
-      <Helmet>
-        <title>{ `${ Constants.APP_TITLE } - Home` }</title>
-        <meta
-          name="description"
-          content="Welcome to Board Game Jouer, which is an open-source multiplayer game in the browser meant to be hostable, modifiable, and playable by anyone."
-        />
-      </Helmet>
-
       <View flex center column style={ { width: 700, maxWidth: '100%' } }>
         <Space size="xs" />
         <Text style={ { color: 'white', fontSize: 13 } }>

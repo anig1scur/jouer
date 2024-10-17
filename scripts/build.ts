@@ -1,5 +1,5 @@
 import {build} from 'esbuild';
-import alias from 'esbuild-plugin-alias';
+import { tailwindPlugin } from 'esbuild-plugin-tailwindcss';
 
 type Environment = 'production' | 'development';
 
@@ -35,6 +35,7 @@ export async function buildClient() {
     publicPath: '/',
     plugins: [
       // svgrPlugin(),
+      tailwindPlugin({}),
       // alias({
       //   assets: '../app/client/src/game/assets',
       // }),

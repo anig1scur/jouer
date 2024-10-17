@@ -13,8 +13,10 @@ const ZINDEXES = {
 };
 
 export interface Stats {
+  mode: string;
+  state: string;
   roomName: string;
-  playerName: string;
+  me: Models.PlayerJSON;
   players: Models.PlayerJSON[];
   playersCount: number;
 }
@@ -44,13 +46,15 @@ function resize() {
 }
 
 export class JouerGame {
+  private state: string;
   private roomName: string;
-
-  private app: Application;
-  private table: Container;
-  private hand: Hand;
+  private awardEndsAt: number;
+  private gameEndsAt: number;
+  private maxPlayers: number;
+  private mode: string;
 
   private me: Player;
+  private app: Application;
 
   private activePlayer: string;
   private handManager: HandManager;
@@ -109,10 +113,6 @@ export class JouerGame {
       sprite.height = window.innerHeight;
     });
 
-    this.table = new Container();
-    this.table.zIndex = ZINDEXES.TABLE;
-    this.app.stage.addChild(this.table);
-
     this.handManager = new HandManager(this.borrowCard);
     this.handManager.zIndex = ZINDEXES.CARDS;
     this.app.stage.addChild(this.handManager);
@@ -136,9 +136,8 @@ export class JouerGame {
     this.onActionSend = onActionSend;
   }
 
-  start = () => {
-    let rootDom = document.getElementById('root');
-    rootDom.appendChild(this.app.canvas);
+  start = (ref: HTMLElement) => {
+    ref.appendChild(this.app.canvas);
     this.app.start();
     this.app.ticker.add(this.update);
     this.initializeGame();
@@ -265,14 +264,14 @@ export class JouerGame {
     //   throw new Error("It's not your turn!");
     // }
 
-   this.onActionSend({
+    this.onActionSend({
       type: 'borrow',
       playerId: this.me.id,
       ts: 1,
       value: {cardIdx, inverse, targetIdx},
       // value: card.cardIndex,
     });
-  }
+  };
 
   private getCurrentPlayer = (): Player => {
     return this.playersManager.get(this.activePlayer);
@@ -284,17 +283,25 @@ export class JouerGame {
   };
 
   getStats = (): Stats => {
-    const players: Models.PlayerJSON[] = this.playersManager.getAll().map((player) => ({
+    const playerToJSON = (player: Player): Models.PlayerJSON => ({
       id: player.id,
       name: player.name,
       score: player.score,
-      hand: player.getHand(),
+      ready: player.ready,
+      status: player.status,
       cardCount: player.cardCount,
       jouerCount: player.jouerCount,
-    }));
+    });
+
+    const players: Models.PlayerJSON[] = this.playersManager.getAll().map(playerToJSON);
+
+    const me = this.me ? playerToJSON(this.me) : null;
+
     return {
-      roomName: "DnD's Happy Scout Time",
-      playerName: this.me ? this.me.name : '',
+      roomName: this.roomName,
+      mode: this.mode,
+      state: this.state,
+      me,
       players,
       playersCount: this.playersManager.getAll().length,
     };
@@ -343,15 +350,13 @@ export class JouerGame {
     }
   };
 
-  gameUpdate = (name: string, value: any) => {
-    console.log(name, value);
-    switch (name) {
-      case 'roomName':
-        this.roomName = value;
-        break;
-      default:
-        break;
-    }
+  gameUpdate = (gameState: any) => {
+    this.mode = gameState.mode;
+    this.state = gameState.state;
+    this.roomName = gameState.roomName;
+    this.awardEndsAt = gameState.awardEndsAt;
+    this.gameEndsAt = gameState.gameEndsAt;
+    this.maxPlayers = gameState.maxPlayers;
   };
 
   activePlayerUpdate = (playerId: string) => {
@@ -383,6 +388,8 @@ export class JouerGame {
       return;
     }
     const idx = this.tableManager.cards.findIndex((c) => c.id === card.id);
-    this.handManager.setBorrowingCard(new Card(idx, card.id, card.values, card.owner, card.state, this.handManager, 'borrow'));
-  }
+    this.handManager.setBorrowingCard(
+      new Card(idx, card.id, card.values, card.owner, card.state, this.handManager, 'borrow')
+    );
+  };
 }

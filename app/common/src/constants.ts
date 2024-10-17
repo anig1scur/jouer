@@ -14,8 +14,8 @@ export const ROOM_PLAYERS_SCALES = [2, 4, 8, 16];
 export const ROOM_NAME_MAX = 24;
 export const PLAYER_NAME_MAX = 12;
 export const LOG_LINES_MAX = 5;
-export const LOBBY_DURATION = 1000 * 10; // 10 seconds
-export const GAME_DURATION = 1000 * 90; // 90 seconds
+export const AWARDING_DURATION = 1000 * 6; // 6 seconds
+export const GAME_DURATION = 1000 * 3600; // 3600 seconds
 
 // Background
 export const BACKGROUND_COLOR = '#25131A';

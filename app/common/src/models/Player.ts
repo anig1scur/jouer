@@ -16,6 +16,7 @@ export interface PlayerJSON {
   id: string;
   name: string;
   score: number;
+  ready?: boolean;
   cardCount: number;
   jouerCount: number;
   hand?: CardJSON[];

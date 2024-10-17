@@ -3,9 +3,9 @@ import {MapSchema, Schema, type} from '@colyseus/schema';
 import {Player} from './Player';
 
 export interface IGame {
+  mode?: string;
   roomName: string;
   maxPlayers: number;
-  mode: string;
   onWaitingStart: (message?: Models.MessageJSON) => void;
   onGameStart: (message?: Models.MessageJSON) => void;
   onGameEnd: (message?: Models.MessageJSON) => void;
@@ -19,7 +19,7 @@ export class Game extends Schema {
   public roomName: string;
 
   @type('number')
-  public lobbyEndsAt: number;
+  public awardEndsAt: number;
 
   @type('number')
   public gameEndsAt: number;
@@ -28,21 +28,33 @@ export class Game extends Schema {
   public maxPlayers: number;
 
   @type('string')
-  public mode: string;
+  public mode: string = 'jouer';
+  // only one normal mode for now
 
-  // Hidden fields
   private onWaitingStart: (message?: Models.MessageJSON) => void;
 
   private onGameStart: (message?: Models.MessageJSON) => void;
 
   private onGameEnd: (message?: Models.MessageJSON) => void;
 
+  get isWaiting(): boolean {
+    return this.state === 'waiting';
+  }
+
+  get isPlaying(): boolean {
+    return this.state === 'playing';
+  }
+
+  get isAwarding(): boolean {
+    return this.state === 'awarding';
+  }
+
   // Init
   constructor(attributes: IGame) {
     super();
+    this.mode = attributes.mode;
     this.roomName = attributes.roomName;
     this.maxPlayers = attributes.maxPlayers;
-    this.mode = attributes.mode;
     this.onWaitingStart = attributes.onWaitingStart;
     this.onGameStart = attributes.onGameStart;
     this.onGameEnd = attributes.onGameEnd;
@@ -55,7 +67,7 @@ export class Game extends Schema {
         this.updateWaiting(players);
         break;
       case 'awarding':
-        this.updateLobby(players);
+        this.updateAwarding(players);
         break;
       case 'playing':
         this.updateGame(players);
@@ -65,22 +77,17 @@ export class Game extends Schema {
     }
   }
 
-  updateWaiting(players: MapSchema<Player>) {
-    // If there are two players, the game starts.
-    if (countPlayers(players) > 1) {
-      this.startLobby();
-    }
-  }
+  updateWaiting(players: MapSchema<Player>) {}
 
-  updateLobby(players: MapSchema<Player>) {
+  updateAwarding(players: MapSchema<Player>) {
     // If a player is alone, the game stops.
     if (countPlayers(players) === 1) {
       this.startWaiting();
       return;
     }
 
-    // If the lobby is over, the game starts.
-    if (this.lobbyEndsAt < Date.now()) {
+    // If the award is over, the game starts.
+    if (this.awardEndsAt < Date.now()) {
       this.startGame();
     }
   }
@@ -101,7 +108,7 @@ export class Game extends Schema {
         ts: Date.now(),
         params: {},
       });
-      this.startLobby();
+      this.startAwarding();
 
       return;
     }
@@ -117,7 +124,7 @@ export class Game extends Schema {
             name: player.name,
           },
         });
-        this.startLobby();
+        this.startAwarding();
 
         return;
       }
@@ -126,19 +133,33 @@ export class Game extends Schema {
 
   // Start
   startWaiting() {
-    this.lobbyEndsAt = undefined;
-    this.gameEndsAt = undefined;
+    if (this.isWaiting) {
+      return;
+    }
+
     this.state = 'waiting';
+    this.awardEndsAt = undefined;
+    this.gameEndsAt = undefined;
     this.onWaitingStart();
   }
 
-  startLobby() {
-    this.lobbyEndsAt = Date.now() + Constants.LOBBY_DURATION;
+  startAwarding() {
+    if (this.isAwarding) {
+      return;
+    }
+
+    this.state = 'awarding';
+    this.awardEndsAt = Date.now() + Constants.AWARDING_DURATION;
     this.gameEndsAt = undefined;
   }
 
   startGame() {
-    this.lobbyEndsAt = undefined;
+    if (this.isPlaying) {
+      return;
+    }
+
+    this.state = 'playing';
+    this.awardEndsAt = undefined;
     this.gameEndsAt = Date.now() + Constants.GAME_DURATION;
     this.onGameStart();
   }

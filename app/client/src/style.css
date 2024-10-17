@@ -1,3 +1,7 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
 @font-face {
   font-family: Kreon;
   src: url(./assets/fonts/Kreon-Regular.ttf);
