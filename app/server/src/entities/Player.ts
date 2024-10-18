@@ -22,13 +22,13 @@ export class Player extends Schema {
   public hand: ArraySchema<Card> = new ArraySchema<Card>();
 
   @type('number')
-  public score: number;
+  public score: number = 0;
 
   @type('number')
-  public cardCount: number;
+  public cardCount: number = this.hand.length;
 
   @type('number')
-  public jouerCount: number;
+  public jouerCount: number = 3;
 
   @type('string')
   public status: Models.PlayerStatus;
@@ -46,10 +46,6 @@ export class Player extends Schema {
     super();
     this.id = id;
     this.name = name;
-    this.hand = new ArraySchema<Card>();
-    this.score = 0;
-    this.cardCount = 0;
-    this.jouerCount = 0;
   }
 
   clearHand(): void {
@@ -77,14 +73,15 @@ export class Player extends Schema {
     }
 
     this.hand = new ArraySchema<Card>(...this.hand);
+    this.cardCount = this.hand.length;
 
     console.log('Player', this.id, 'received card', card.id);
   }
 
   playCards(cards: Card[]): void {
     const cardIdsToRemove = new Set(cards.map((card) => card.id));
-
     this.hand = new ArraySchema<Card>(...this.hand.filter((card) => !cardIdsToRemove.has(card.id)));
+    this.cardCount = this.hand.length;
   }
 
   borrowCard(card: Card, idx: number): void {
@@ -93,7 +90,7 @@ export class Player extends Schema {
   }
 
   eatCards(cards: Card[]): void {
-    // this.score += cards.length;
+    this.score += cards.length;
   }
 
   incrementBorrowedCount(): void {

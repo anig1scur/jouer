@@ -33,8 +33,8 @@ export class BaseManager<T extends BaseEntity> extends Container {
   // Entities
   public add = (key: string, entity: T) => {
     this.entities[key] = entity;
-    entity.container.position.set(0, this.children.length * 150);
-    this.addChild(entity.container);
+    // entity.container.position.set(0, this.children.length * 150);
+    // this.addChild(entity.container);
   };
 
   public get = (key: string): T | undefined => {
@@ -99,7 +99,7 @@ export class HandManager extends BaseManager<Card> {
 
     this.borrowingCard = card.clone();
     console.log('borrowingCard', this.borrowingCard);
-    this.borrowingCard.container.position.set(800, -320);
+    this.borrowingCard.container.position.set(800, -330);
     this.addChild(this.borrowingCard.container);
 
     // Create and position the reversed card
@@ -137,16 +137,16 @@ export class HandManager extends BaseManager<Card> {
     for (let i = 0; i <= totalCards; i++) {
       const slot = new PIXI.Graphics();
       slot.fill({
-        color: 0xffffff,
+        color: 0xFFEDD7,
         alpha: 0.5,
       });
-      slot.rect(-30, -40, 60, 80);
+      slot.roundRect(-30, -40, 60, 80, 10);
       slot.fill();
 
       const angleStep = totalAngle / totalCards;
       const angle = -totalAngle / 2 + i * angleStep;
       slot.rotation = angle;
-      slot.position.set(i * 80 - 30, Math.abs(angle) * 100);
+      slot.position.set(i * 80 - 20, Math.abs(angle) * 100);
 
       slot.interactive = true;
       slot.cursor = 'pointer';

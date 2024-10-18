@@ -100,7 +100,7 @@ const Home: React.FC = () => {
 
   const renderName = () => (
     <Box style={ { width: 500, maxWidth: '100%' } }>
-      <View flex>
+      <View flex column>
         <Inline size="thin" />
         <Text>Welcome to Board Game Jouer !</Text>
         <br />

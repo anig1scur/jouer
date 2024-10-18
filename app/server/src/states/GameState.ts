@@ -160,6 +160,7 @@ export class GameState extends Schema {
     }
     if (this.canPlayCards(cards)) {
       player.playCards(cards);
+      player.eatCards([...this.table.cards]);
       this.table.setCards(cards);
       this.nextTurn();
     } else {
@@ -177,6 +178,12 @@ export class GameState extends Schema {
     const card = this.table.cards[cardIdx];
     if (card) {
       player.tryBorrowCard(card);
+      this.onMessage({
+        type: 'tryBorrow',
+        from: 'server',
+        ts: Date.now(),
+        params: {name: player.name},
+      });
     } else {
       throw new Error('Cannot borrow this card');
     }
@@ -204,6 +211,16 @@ export class GameState extends Schema {
     owner.borrowingCard = null;
     this.table.update();
 
+    this.onMessage({
+      type: 'borrow',
+      from: 'server',
+      ts: Date.now(),
+      params: {
+        name: player.name,
+        card: card.values,
+      },
+    });
+
     if (card) {
       this.nextTurn();
     } else {
@@ -215,6 +232,14 @@ export class GameState extends Schema {
     const idx = Array.from(this.players.keys()).indexOf(this.activePlayerId);
     const nextIdx = (idx + 1) % this.players.size;
     this.activePlayerId = Array.from(this.players.keys())[nextIdx];
+
+    this.onMessage({
+      type: 'turn',
+      from: 'server',
+      ts: Date.now(),
+      params: {name: this.getCurrentPlayer().name},
+    });
+
   }
 
   private getCurrentPlayer(): Player {

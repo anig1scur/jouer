@@ -22,7 +22,7 @@ export interface HUDProps {
   playersCount: number;
   playersMaxCount: number;
   messages: Models.MessageJSON[];
-  announce?: string;
+  notice?: string;
   me?: Models.PlayerJSON;
 }
 
@@ -60,7 +60,7 @@ export default class Match extends Component<IProps, IState> {
         playersCount: 0,
         playersMaxCount: 0,
         messages: [],
-        announce: '',
+        notice: '',
       },
     };
   }
@@ -131,8 +131,6 @@ export default class Match extends Component<IProps, IState> {
     this.room.state.table.listen("cards", this.handleTableChange);
     this.room.state.listen("game", this.handleGameChange);
     this.room.state.listen("activePlayerId", this.handleActivePlayerChange);
-    // this.room.state.players.onChange(this.handlePlayerUpdate);
-    this.room.state.players.onRemove(this.handlePlayerRemove);
 
     // Listen for Messages
     this.room.onMessage('*', this.handleMessage);
@@ -190,6 +188,10 @@ export default class Match extends Component<IProps, IState> {
   handlePlayerAdd = (player: any, playerId: string) => {
     const isMe = this.isPlayerIdMe(playerId);
     this.game.playerAdd(playerId, player, isMe);
+    player.onChange(() => {
+      this.handlePlayerUpdate(player, playerId);
+    })
+
     if (isMe) {
       player.listen("hand", (curCards: any[]) => {
         this.handleCardsChange(curCards);
@@ -217,19 +219,31 @@ export default class Match extends Component<IProps, IState> {
   handleMessage = (type: any, message: Models.MessageJSON) => {
     const { messages } = this.state.hud;
 
-    let announce: string | undefined;
+    let notice: string | undefined;
     switch (type) {
       case 'waiting':
-        announce = `Waiting for other players...`;
+        notice = `Waiting for other players...`;
         break;
       case 'start':
-        announce = `Game starts`;
+        notice = `Game starts`;
         break;
       case 'won':
-        announce = `${ message.params.name } wins!`;
+        notice = `${ message.params.name } wins!`;
         break;
       case 'timeout':
-        announce = `Timeout...`;
+        notice = `Timeout...`;
+        break;
+      case 'tryBorrow':
+        notice = `${ message.params.name } 正在借牌`;
+        break;
+      case 'borrow':
+        notice = `${ message.params.name } 借走了 ${ message.params.card }`;
+        break;
+      case 'jouer':
+        notice = `${ message.params.name } 想表演`;
+        break;
+      case 'turn':
+        notice = `现在是 ${ message.params.name } 的回合`;
         break;
       default:
         break;
@@ -239,7 +253,7 @@ export default class Match extends Component<IProps, IState> {
       hud: {
         ...prev.hud,
         messages: [...messages, message].slice(-Constants.LOG_LINES_MAX),
-        announce,
+        notice,
       },
     }));
 
@@ -287,7 +301,10 @@ export default class Match extends Component<IProps, IState> {
         <title>{ `${ hud.roomName || hud.gameMode } [${ hud.playersCount }]` }</title>
         <div ref={ this.canvasRef } />
         <Messages messages={ hud.messages } />
-        <Players players={ hud.players } me={hud.messages} />
+        <Players players={ hud.players } me={ hud.me } />
+        <div className='select-none absolute top-2 left-1/2 transform -translate-x-1/2 w-52 max-h-36 text-[#70422F]'>
+          { hud.notice }
+        </div>
       </>
     );
   }

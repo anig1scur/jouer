@@ -119,7 +119,7 @@ export class JouerGame {
 
     this.playersManager = new PlayersManager();
     this.playersManager.zIndex = ZINDEXES.PLAYERS;
-    this.app.stage.addChild(this.playersManager);
+    // this.app.stage.addChild(this.playersManager);
 
     this.tableManager = new TableManager();
     this.tableManager.zIndex = ZINDEXES.TABLE;
