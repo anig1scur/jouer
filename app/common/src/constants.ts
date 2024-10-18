@@ -10,7 +10,7 @@ export const DEBUG = true;
 // Game
 export const ROOM_PLAYERS_MIN = 2;
 export const ROOM_PLAYERS_MAX = 6;
-export const ROOM_PLAYERS_SCALES = [2, 4, 8, 16];
+export const ROOM_PLAYERS_SCALES = [2, 3, 4, 5];
 export const ROOM_NAME_MAX = 24;
 export const PLAYER_NAME_MAX = 12;
 export const LOG_LINES_MAX = 5;

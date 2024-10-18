@@ -29,8 +29,8 @@ const Home: React.FC = () => {
   const [playerName, setPlayerName] = useState(localStorage.getItem('playerName') || '');
   const [hasNameChanged, setHasNameChanged] = useState(false);
   const [isNewRoom, setIsNewRoom] = useState(false);
-  const [roomName, setRoomName] = useState(localStorage.getItem('roomName') || '');
-  const [roomMaxPlayers, setRoomMaxPlayers] = useState(PlayersCountList[0].value as number);
+  const [roomName, setRoomName] = useState(localStorage.getItem('roomName') || 'DnD\'s happy Jouer Time');
+  const [roomMaxPlayers, setRoomMaxPlayers] = useState(4);
   const [mode, setMode] = useState('');
   const [rooms, setRooms] = useState<Array<RoomAvailable<any>>>([]);
   const [client, setClient] = useState<Client | null>(null);
