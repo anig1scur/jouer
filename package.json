@@ -10,10 +10,8 @@
         "name": "Eunice",
         "url": "https://github.com/anig1scur"
     },
-    "workspaces": [
-        "app/*"
-    ],
     "scripts": {
+        "start": "yarn serve",
         "client": "yarn workspace @jouer/client",
         "server": "yarn workspace @jouer/server",
         "clean": "sh ./scripts/clean.sh",
