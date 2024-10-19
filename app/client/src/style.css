@@ -15,24 +15,21 @@
 html,
 body {
   height: 100%;
-  font-family: 'Kreon';
   font-size: 26px;
 }
 
 body {
   margin: 0;
   padding: 0;
-  background-color: #7f9dd5;
+  background-color: #FFE6BD;
   overflow: hidden;
 }
 
-h1,
-p,
+
 input,
-select,
-button {
-  margin: 0;
-  font-family: 'Kreon';
+select {
+  outline: none;
+  border: none;
 }
 
 a {
