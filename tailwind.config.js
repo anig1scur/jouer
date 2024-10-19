@@ -5,6 +5,13 @@ module.exports = {
   darkMode: ['media', "class"],
   theme: {
     extend: {
+      colors: {
+        'bgc': '#FFE6BD',
+        'primary': '#F69C6C',
+        'secondary': '#D1714A',
+        'text': '#FFEDD7',
+        'dtext': '#70422F'
+      },
       backgroundImage: {
         "bg": "url('./assets/imgs/bg.svg')",
         "wave": "url('./assets/imgs/wave.svg')",
@@ -19,5 +26,7 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('tailwind-scrollbar'),
+  ],
 }

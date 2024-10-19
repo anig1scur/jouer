@@ -40,3 +40,8 @@ a {
 a:hover {
   text-decoration: none;
 }
+
+*::selection {
+  background-color: #D1714A;
+  color: white;
+}

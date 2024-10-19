@@ -15,9 +15,11 @@ export const Messages = React.memo(
 
     return (
       <Draggable>
-        <div className='select-none absolute w-52 max-h-36 top-2 right-3 cursor-move rounded-xl backdrop-blur-sm shadow p-3 bg-[#DC905A] bg-opacity-20'>
-          { messages.map((message, index) => (
-            <Message key={ message.ts } message={ message } />
+        <div className='select-none absolute w-64 max-h-36 h-36 overflow-y-auto flex flex-col-reverse
+        scrollbar-thin scrollbar-thumb-[#DC905A] scrollbar-track-text scrollbar-thumb-rounded-full scrollbar-track-rounded-full
+        top-2 right-3 cursor-move rounded-xl backdrop-blur-sm shadow p-3 bg-[#DC905A] bg-opacity-20'>
+          { messages.reverse().map((message, index) => (
+            <Message key={ message.ts + message.type } message={ message } />
           )) }
         </div>
       </Draggable>
@@ -25,17 +27,14 @@ export const Messages = React.memo(
   },
 );
 
-/**
- * Render a single message.
- */
 function Message(props: { message: Models.MessageJSON }): React.ReactElement {
   const { message } = props;
 
   return (
-    <div className='text-[#ffeec7] flex gap-2 items-center'>
-      <div className='text-sm font-semibold text-opacity-80'>{ getMMSSFromTimestamp(message.ts) }</div>
+    <div className=' text-dtext text-sm flex gap-2 items-center'>
+      <div className='font-thin text-xs text-opacity-75'>{ getMMSSFromTimestamp(message.ts) }</div>
       {/* <div className="text-sm font-semibold text-opacity-80">{ `[${ message.from }]` }</div> */ }
-      <div className="text-base text-[#70422F]">{ getFormattedMessage(message) }</div>
+      <div >{ getFormattedMessage(message) }</div>
     </div>
   );
 }

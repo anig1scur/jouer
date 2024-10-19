@@ -302,7 +302,7 @@ export default class Match extends Component<IProps, IState> {
         <div ref={ this.canvasRef } />
         <Messages messages={ hud.messages } />
         <Players players={ hud.players } me={ hud.me } />
-        <div className='select-none absolute top-2 left-1/2 transform -translate-x-1/2 w-52 max-h-36 text-[#70422F]'>
+        <div className='select-none absolute top-2 left-1/2 transform -translate-x-1/2 w-52 max-h-36 text-dtext'>
           { hud.notice }
         </div>
       </>

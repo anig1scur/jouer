@@ -30,9 +30,9 @@ function Player(props: { player: Models.PlayerJSON }): React.ReactElement {
   const { player } = props;
 
   return (
-    <div className="flex items-center justify-between text-[#70422F] p-1 rounded-lg gap-3">
-      <div className="flex items-center flex-col">
-        <img src={ Face } alt="Face" className="w-12 h-12 mr-2" />
+    <div className="pointer-events-none flex items-center justify-between text-dtext p-1 rounded-lg gap-3">
+      <div className="flex items-center flex-col mr-2">
+        <img src={ Face } alt="Face" className="w-12 h-12" />
         <div className="text-brown-700">{ player.name }</div>
       </div>
       <div className="flex flex-col items-center bg-[#DFA36E] bg-opacity-20 shadow-md gap-3 p-2 rounded-md">
