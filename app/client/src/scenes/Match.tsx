@@ -13,17 +13,14 @@ interface IProps {
 }
 
 export interface HUDProps {
-  gameMode: string;
-  gameModeEndsAt: number;
+  state: string;
+  mode: string;
   roomName: string;
-  playerId: string;
-  playerName: string;
   players: Models.PlayerJSON[];
   playersCount: number;
   playersMaxCount: number;
   messages: Models.MessageJSON[];
   notice?: string;
-  me?: Models.PlayerJSON;
 }
 
 interface IState {
@@ -51,11 +48,9 @@ export default class Match extends Component<IProps, IState> {
 
     this.state = {
       hud: {
-        gameMode: '',
-        gameModeEndsAt: 0,
+        state: '',
+        mode: '',
         roomName: '',
-        playerId: '',
-        playerName: '',
         players: [],
         playersCount: 0,
         playersMaxCount: 0,
@@ -129,7 +124,9 @@ export default class Match extends Component<IProps, IState> {
     // Listen for state changes
     this.room.state.players.onAdd(this.handlePlayerAdd);
     this.room.state.table.listen("cards", this.handleTableChange);
-    this.room.state.listen("game", this.handleGameChange);
+    this.room.state.game.onChange(this.handleGameChange);
+    // state 单独监听一下
+    this.room.state.game.listen("state", this.handleGameStateChange);
     this.room.state.listen("activePlayerId", this.handleActivePlayerChange);
 
     // Listen for Messages
@@ -175,15 +172,23 @@ export default class Match extends Component<IProps, IState> {
     this.game.activePlayerUpdate(playerId);
   }
 
-  handleGameChange = (newGame: any) => {
-    this.game.gameUpdate(newGame);
+  handleGameStateChange = (state: string) => {
+    this.setState((prev) => ({
+      hud: {
+        ...prev.hud,
+        state
+      },
+    }));
+  }
+
+  handleGameChange = () => {
+    this.game.gameUpdate(this.room.state.game);
   };
 
   handleTableChange = (cards: Card[]) => {
     console.log(cards, "tableUpdate")
     this.game.tableUpdate(cards);
   }
-
 
   handlePlayerAdd = (player: any, playerId: string) => {
     const isMe = this.isPlayerIdMe(playerId);
@@ -295,14 +300,27 @@ export default class Match extends Component<IProps, IState> {
   // RENDER
   render() {
     const { hud } = this.state;
+    const {
+      state,
+      playersCount,
+      playersMaxCount,
+      messages,
+      players,
+      roomName,
+    } = hud;
 
     return (
       <>
-        <title>{ `${ hud.roomName || hud.gameMode } [${ hud.playersCount }]` }</title>
         <div ref={ this.canvasRef } />
-        <Messages messages={ hud.messages } />
-        <Players players={ hud.players } me={ hud.me } />
-        <div className='select-none absolute top-2 left-1/2 transform -translate-x-1/2 w-52 max-h-36 text-dtext'>
+        {
+          state !== "playing" && <div className='select-none absolute top-5 left-1/2 transform -translate-x-1/2 text-dtext font-jmadh text-4xl pointer-events-none'>{ `${ roomName } - ${ playersCount } / ${ playersMaxCount }` }</div>
+        }
+        {
+          state === "waiting" && <div className="bg-rule bg-contain bg-center w-full bg-no-repeat h-36 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+        }
+        <Messages messages={ messages } />
+        <Players players={ players } />
+        <div className='select-none absolute top-2 left-1/2 transform text-opacity-75 -translate-x-1/2 w-52 max-h-36 text-dtext'>
           { hud.notice }
         </div>
       </>

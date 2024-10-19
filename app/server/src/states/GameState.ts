@@ -1,7 +1,6 @@
 import {Schema, type, MapSchema, ArraySchema, filter} from '@colyseus/schema';
-import {Client} from 'colyseus';
 import {Player, Card, Deck, Table, Game} from '../entities';
-import {Constants, Types, Models} from '@jouer/common';
+import {Models} from '@jouer/common';
 
 export class GameState extends Schema {
   @type(Game)
@@ -239,7 +238,6 @@ export class GameState extends Schema {
       ts: Date.now(),
       params: {name: this.getCurrentPlayer().name},
     });
-
   }
 
   private getCurrentPlayer(): Player {
@@ -263,8 +261,6 @@ export class GameState extends Schema {
       params: {},
     });
   };
-
-  private handleLobbyStart = () => {};
 
   private handleGameStart = () => {
     this.onMessage({

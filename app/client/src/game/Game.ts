@@ -2,23 +2,22 @@ import {Application, Container, Texture, Sprite, Text} from 'pixi.js';
 import {Player} from './entities/Player';
 import {Card, Hand} from './entities/Card';
 import {Models} from '@jouer/common/src';
-import {HandManager, PlayersManager, TableManager, ActionManager, MessageManager} from './managers';
+import {HandManager, PlayersManager, TableManager, ActionManager} from './managers';
 
 const ZINDEXES = {
   TABLE: 1,
   CARDS: 2,
   PLAYERS: 3,
   UI: 4,
-  MESSAGES: 5,
 };
 
 export interface Stats {
   mode: string;
   state: string;
   roomName: string;
-  me: Models.PlayerJSON;
   players: Models.PlayerJSON[];
   playersCount: number;
+  playersMaxCount: number;
 }
 
 export const app = new Application();
@@ -61,7 +60,6 @@ export class JouerGame {
   private tableManager: TableManager;
   private playersManager: PlayersManager;
   private actionManager: ActionManager;
-  private messageManager: MessageManager;
 
   private onActionSend: (action: Models.ActionJSON) => void;
 
@@ -119,7 +117,7 @@ export class JouerGame {
 
     this.playersManager = new PlayersManager();
     this.playersManager.zIndex = ZINDEXES.PLAYERS;
-    // this.app.stage.addChild(this.playersManager);
+    this.app.stage.addChild(this.playersManager);
 
     this.tableManager = new TableManager();
     this.tableManager.zIndex = ZINDEXES.TABLE;
@@ -129,10 +127,6 @@ export class JouerGame {
     this.actionManager.zIndex = ZINDEXES.UI;
     this.app.stage.addChild(this.actionManager);
 
-    this.messageManager = new MessageManager();
-    this.messageManager.zIndex = ZINDEXES.MESSAGES;
-    this.app.stage.addChild(this.messageManager);
-
     this.onActionSend = onActionSend;
   }
 
@@ -140,7 +134,6 @@ export class JouerGame {
     ref.appendChild(this.app.canvas);
     this.app.start();
     this.app.ticker.add(this.update);
-    this.initializeGame();
   };
 
   stop = () => {
@@ -151,8 +144,6 @@ export class JouerGame {
   private update = () => {
     // Update game state, animations, etc.
   };
-
-  private initializeGame = () => {};
 
   private bindActionCallbacks = () => {
     this.actionManager.bindHandler('play', () => {
@@ -182,44 +173,6 @@ export class JouerGame {
     });
   };
 
-  isSequence(values: number[]): boolean {
-    for (let i = 1; i < values.length; i++) {
-      if (values[i] !== values[i - 1] + 1 || values[i] !== values[i - 1] + 1) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  private isValidPlay = (cards: Card[]): boolean => {
-    // 1. if all cards cardIndex is continuous
-    // 2. if is single / sequence / same
-    // 3. if the cardIndex is bigger than the last played cardIndex
-
-    if (cards.length === 0) {
-      return false;
-    }
-
-    const hand = this.getCurrentPlayer().getHand();
-    const idxes = cards.map((card) => hand.findIndex((c) => c.id === card.id));
-
-    if (!this.isSequence(idxes)) {
-      return false;
-    }
-    const values = cards.map((card) => card.value);
-    if (cards.length === 1) {
-      return true;
-    } else if (cards.length > 1) {
-      if (cards.every((card) => card.value === cards[0].value)) {
-        return true;
-      } else if (this.isSequence(values)) {
-        return true;
-      }
-    }
-
-    return false;
-  };
-
   private nextTurn = () => {
     // Implement the logic to move to the next player's turn
     // This might involve skipping players, reversing the order, etc.
@@ -236,9 +189,6 @@ export class JouerGame {
     const nextPlayer = this.getNextPlayer();
     const joueredCard = nextPlayer.removeRandomCard();
     player.addCardToHand(joueredCard);
-
-    // this.handManager.updatePlayerHand(playerId, player.getHand());
-    // this.handManager.updatePlayerHand(nextPlayer.id, nextPlayer.getHand());
 
     this.nextTurn();
   };
@@ -269,7 +219,6 @@ export class JouerGame {
       playerId: this.me.id,
       ts: 1,
       value: {cardIdx, inverse, targetIdx},
-      // value: card.cardIndex,
     });
   };
 
@@ -293,16 +242,18 @@ export class JouerGame {
       jouerCount: player.jouerCount,
     });
 
+    const roomName = this.roomName;
+    const mode = this.mode;
+    const state = this.state;
+
     const players: Models.PlayerJSON[] = this.playersManager.getAll().map(playerToJSON);
 
-    const me = this.me ? playerToJSON(this.me) : null;
-
     return {
-      roomName: this.roomName,
-      mode: this.mode,
-      state: this.state,
-      me,
+      roomName,
+      mode,
+      state,
       players,
+      playersMaxCount: this.maxPlayers,
       playersCount: this.playersManager.getAll().length,
     };
   };
@@ -351,6 +302,7 @@ export class JouerGame {
   };
 
   gameUpdate = (gameState: any) => {
+    // TODO: 这里的 state 等信息没有 update 成功
     this.mode = gameState.mode;
     this.state = gameState.state;
     this.roomName = gameState.roomName;

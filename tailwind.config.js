@@ -19,6 +19,7 @@ module.exports = {
         "face": "url('./assets/imgs/face.svg')",
         "hand": "url('./assets/imgs/hand.png')",
         "score": "url('./assets/imgs/score.png')",
+        "rule": "url('./assets/imgs/rule.png')",
       },
       fontFamily: {
         "kreon": ["Kreon", "sans-serif"],

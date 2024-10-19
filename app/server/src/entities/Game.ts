@@ -13,7 +13,7 @@ export interface IGame {
 
 export class Game extends Schema {
   @type('string')
-  public state: Types.GameState = 'waiting';
+  public state: Types.GameState;
 
   @type('string')
   public roomName: string;
@@ -58,6 +58,7 @@ export class Game extends Schema {
     this.onWaitingStart = attributes.onWaitingStart;
     this.onGameStart = attributes.onGameStart;
     this.onGameEnd = attributes.onGameEnd;
+    this.state = 'waiting';
   }
 
   // Update
@@ -87,7 +88,7 @@ export class Game extends Schema {
     }
 
     // If the award is over, the game starts.
-    if (this.awardEndsAt < Date.now()) {
+    if (this.awardEndsAt && this.awardEndsAt < Date.now()) {
       this.startGame();
     }
   }
@@ -101,7 +102,7 @@ export class Game extends Schema {
     }
 
     // If the time is out, the game stops.
-    if (this.gameEndsAt < Date.now()) {
+    if (this.gameEndsAt && this.gameEndsAt < Date.now()) {
       this.onGameEnd({
         type: 'timeout',
         from: 'server',

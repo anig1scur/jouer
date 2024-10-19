@@ -6,7 +6,7 @@ import Face from '../../game/assets/face.png';
 import Score from '../../game/assets/score.png';
 
 export const Players = React.memo(
-  (props: { players: Models.PlayerJSON[], me: Models.PlayerJSON }): React.ReactElement | null => {
+  (props: { players: Models.PlayerJSON[] }): React.ReactElement | null => {
 
     return (
       <Draggable>

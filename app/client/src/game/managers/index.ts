@@ -75,7 +75,6 @@ export class HandManager extends BaseManager<Card> {
   setCards(cards: Card[]) {
     this.emptyHand();
     this.cards = cards;
-    this.position.set(300, 500);
     const totalCards = cards.length;
     const totalAngle = Math.PI / 6;
     cards.forEach((card, index) => {
@@ -86,6 +85,8 @@ export class HandManager extends BaseManager<Card> {
       this.entities[card.id] = card;
       this.addChild(card.container);
     });
+
+    this.position.set(screen.width / 2 - this.width / 2, screen.height - this.height - 400);
   }
 
   getSelectedCards() {
@@ -137,7 +138,7 @@ export class HandManager extends BaseManager<Card> {
     for (let i = 0; i <= totalCards; i++) {
       const slot = new PIXI.Graphics();
       slot.fill({
-        color: 0xFFEDD7,
+        color: 0xffedd7,
         alpha: 0.5,
       });
       slot.roundRect(-30, -40, 60, 80, 10);
@@ -186,10 +187,10 @@ export class TableManager extends BaseManager<Card> {
     this.emptyTable();
     this.cards = cards;
     this.removeChildren();
-    this.position.set(500, 200);
     const totalCards = cards.length;
-    const totalAngle = Math.PI / 6;
-    this.scale.set(0.75);
+    const totalAngle = Math.PI / 8;
+    this.scale.set(0.8);
+
     cards.forEach((card, index) => {
       const angleStep = totalAngle / totalCards;
       const angle = -totalAngle / 2 + index * angleStep;
@@ -198,6 +199,8 @@ export class TableManager extends BaseManager<Card> {
       this.entities[card.id] = card;
       this.addChild(card.container);
     });
+
+    this.position.set(screen.width / 2 - this.width * 1.5, screen.height / 2 - this.height * 2.75);
   }
 
   reverseCards() {}
@@ -284,8 +287,8 @@ export class ActionManager extends BaseManager<ActionButton> {
       this.addChild(button.container);
     });
 
-    const totalWidth = actions.length * 140 - 20;
-    this.position.set(screen.width / 2 - totalWidth / 2, 900);
+    const totalWidth = actions.length * 130;
+    this.position.set(screen.width / 2 - totalWidth / 2, screen.height - this.height - 300);
   }
 
   bindHandler(action: Models.ActionType, handler: () => void) {
@@ -293,95 +296,5 @@ export class ActionManager extends BaseManager<ActionButton> {
     if (button) {
       button.container.on('click', handler);
     }
-  }
-}
-
-class Message extends BaseEntity {
-  private text: PIXI.Text;
-
-  constructor(content: string) {
-    super();
-    this.text = new PIXI.Text({
-      text: content,
-      style: {
-        fontFamily: 'Arial',
-        fontSize: 14,
-        fill: 0xffffff,
-        wordWrap: true,
-        wordWrapWidth: 380,
-      },
-    });
-  }
-
-  getText() {
-    return this.text;
-  }
-}
-
-export class MessageManager extends BaseManager<Message> {
-  private maxMessages: number;
-  private messageContainer: Container;
-  public mask: PIXI.Graphics;
-
-  constructor() {
-    super('MessageManager');
-
-    this.maxMessages = 30;
-    this.messageContainer = new Container();
-    this.container = new Container();
-    this.container.addChild(this.messageContainer);
-
-    // Create a mask for scrolling
-    this.mask = new PIXI.Graphics();
-    this.mask.fill(0xffffff);
-    this.mask.rect(0, 0, 400, 250);
-    this.mask.fill();
-    this.messageContainer.mask = this.mask;
-    this.container.addChild(this.mask);
-
-    // Set position to top-right corner
-    this.container.position.set(window.innerWidth - 420, 20);
-
-    // Enable scrolling
-    this.container.interactive = true;
-    this.container.on('wheel', this.onScroll.bind(this));
-  }
-
-  addMessage(content: string) {
-    if (Object.keys(this.entities).length >= this.maxMessages) {
-      // Remove the oldest message
-      const oldestMessageKey = Object.keys(this.entities)[0];
-      const oldestMessage = this.entities[oldestMessageKey];
-      this.messageContainer.removeChild(oldestMessage.getText());
-      delete this.entities[oldestMessageKey];
-    }
-
-    const message = new Message(content);
-    const messageText = message.getText();
-    messageText.position.set(10, Object.keys(this.entities).length * 20);
-    this.messageContainer.addChild(messageText);
-    this.entities[content] = message;
-
-    // Adjust position of all messages
-    this.adjustMessagePositions();
-  }
-
-  private adjustMessagePositions() {
-    let yPos = 0;
-    for (const key in this.entities) {
-      const message = this.entities[key];
-      message.getText().position.y = yPos;
-      yPos += 20;
-    }
-  }
-
-  private onScroll(event: WheelEvent) {
-    const delta = event.deltaY > 0 ? -20 : 20;
-    this.messageContainer.y += delta;
-
-    // Ensure the container stays within bounds
-    this.messageContainer.y = Math.min(0, this.messageContainer.y);
-    const maxScroll = Math.max(0, this.messageContainer.height - 250);
-    this.messageContainer.y = Math.max(-maxScroll, this.messageContainer.y);
   }
 }
