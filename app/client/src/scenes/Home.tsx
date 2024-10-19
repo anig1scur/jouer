@@ -45,8 +45,6 @@ const Face = () => <svg width="100%" height="100%" viewBox="0 0 67 67" fill="non
   <circle cx="51.9249" cy="23.785" r="2.515" fill="currentColor" stroke="currentColor" />
 </svg>
 
-
-
 const PlayersCountList = Constants.ROOM_PLAYERS_SCALES.map((value) => ({
   value,
   title: `${ value } players`,
@@ -142,15 +140,17 @@ const Home: React.FC = () => {
           onChange={ handlePlayerNameChange }
           className='rounded-md font-jmadh w-full px-2 placeholder:text-amber-700 placeholder:text-opacity-30 bg-white text-[#70422F]'
         />
-        <div className='bg-dice min-w-8 w-8 h-8 bg-cover '></div>
+        <div title='random one name for you' className='bg-dice min-w-8 w-8 h-8 bg-cover cursor-pointer' onClick={ () => {
+          setPlayerName(Constants.NAME_LIST[Math.floor(Math.random() * Constants.NAME_LIST.length)]);
+          setHasNameChanged(true);
+        } } />
         { hasNameChanged && <div className='bg-[#D1714A] px-1 rounded-md w-16 min-w-16 cursor-pointer text-center' onClick={ handleNameSave }>Save</div> }
-
       </div>
     </div>
   );
 
   const renderNewRoom = () => (
-    <div className='flex flex-col gap-3 font-jmadh mb-3'>
+    <div className='flex flex-col gap-3 font-jmadh'>
       { !isNewRoom && (
         <div title="Create new room" className='bg-[#D1714A] px-1 rounded-md h-10 text-center text-3xl cursor-pointer' onClick={ () => setIsNewRoom(true) } >
           Create Room
@@ -221,6 +221,7 @@ const Home: React.FC = () => {
         { renderName() }
         <div className='bg-[#F69C6C] text-[#FFEDD7] shadow-md w-full flex flex-col gap-3 p-6 rounded-md '>
           { renderNewRoom() }
+          <div className='bg-wave h-1 mb-2 mt-2 bg-contain'></div>
           { renderRooms() }
         </div>
       </div>
