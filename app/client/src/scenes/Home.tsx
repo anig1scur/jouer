@@ -125,11 +125,11 @@ const Home: React.FC = () => {
 
   const renderName = () => (
     <div className='bg-primary text-text shadow-md w-full flex flex-col gap-3 px-6 py-2 rounded-md '>
-      <div className='flex items-center  justify-between'>
-        <div className='w-16 h-16'>
+      <div className='flex items-center justify-between'>
+        <div className='w-16 h-16 retina:w-12'>
           <Face />
         </div>
-        <div className='font-kreon mb-4 text-7xl'>𝓳  𝓸  𝓾  𝓮  𝓻</div>
+        <div className='font-kreon mb-4 text-7xl retina:text-5xl'>𝓳  𝓸  𝓾  𝓮  𝓻</div>
       </div>
       <div className='flex font-jmadh items-center gap-3 text-2xl justify-between'>
         <div className='text-4xl mb-2 '>Name</div>
@@ -216,14 +216,12 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className='bg-bg w-full h-full min-h-screen bg-bgc bg-cover '>
-      <div className='m-auto max-w-md pt-12 gap-5 flex flex-col items-center'>
-        { renderName() }
-        <div className='bg-primary text-text shadow-md w-full flex flex-col gap-3 p-6 rounded-md '>
-          { renderNewRoom() }
-          <div className='bg-wave h-1 mb-2 mt-2 bg-contain'></div>
-          { renderRooms() }
-        </div>
+    <div className='m-auto max-w-md pt-12 gap-5 flex flex-col items-center retina:max-w-sm'>
+      { renderName() }
+      <div className='bg-primary text-text shadow-md w-full flex flex-col gap-3 p-6 rounded-md '>
+        { renderNewRoom() }
+        <div className='bg-wave h-1 mb-2 mt-2 bg-contain'></div>
+        { renderRooms() }
       </div>
     </div>
   );

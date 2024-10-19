@@ -67,8 +67,10 @@ export class JouerGame {
     this.app = app;
     this.app.init({
       backgroundAlpha: 0,
-      width: screenWidth,
-      height: screenHeight,
+      // width: screenWidth,
+      // height: screenHeight,
+      width: screenWidth * window.devicePixelRatio,
+      height: screenHeight * window.devicePixelRatio,
       resizeTo: window,
       autoDensity: true,
       antialias: true,
@@ -277,7 +279,7 @@ export class JouerGame {
   };
 
   playerRemove = (playerId: string, isMe: boolean) => {
-    this.playersManager;
+    this.playersManager.remove(playerId);
 
     // If the player is "you"
     if (isMe) {

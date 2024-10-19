@@ -237,9 +237,9 @@ export class Hand extends PIXI.Container {
       const cardSprite = new Card(index, card.id, card.values, card.owner, card.state, this.onCardSelect);
       cardSprite.container.rotation = angle;
       cardSprite.container.position.set(index * HAND_CARD_WIDTH, Math.abs(angle) * 200);
-
       this.addChild(cardSprite.container);
     });
+
     this.position.set(100, 100);
   }
 

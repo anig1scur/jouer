@@ -5,6 +5,9 @@ module.exports = {
   darkMode: ['media', "class"],
   theme: {
     extend: {
+      screens: {
+        'retina': { 'min-device-pixel-ratio': 2 },  // 自定义针对 retina 屏幕
+      },
       colors: {
         'bgc': '#FFE6BD',
         'primary': '#F69C6C',

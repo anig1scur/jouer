@@ -1,5 +1,5 @@
 import {build} from 'esbuild';
-import { tailwindPlugin } from 'esbuild-plugin-tailwindcss';
+import {tailwindPlugin} from 'esbuild-plugin-tailwindcss';
 
 type Environment = 'production' | 'development';
 
@@ -29,6 +29,7 @@ export async function buildClient() {
       '.ico': 'file',
       '.ttf': 'file',
     },
+    drop: ['console'], // Remove console.log from the code. To remove all console.* calls, use the "
     bundle: true,
     minify: BUILD_MODE === 'production',
     sourcemap: BUILD_MODE === 'development',

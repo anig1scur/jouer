@@ -123,6 +123,7 @@ export default class Match extends Component<IProps, IState> {
 
     // Listen for state changes
     this.room.state.players.onAdd(this.handlePlayerAdd);
+    this.room.state.players.onRemove(this.handlePlayerRemove);
     this.room.state.table.listen("cards", this.handleTableChange);
     this.room.state.game.onChange(this.handleGameChange);
     // state 单独监听一下
@@ -271,7 +272,6 @@ export default class Match extends Component<IProps, IState> {
       return;
     }
 
-    console.log(action.type, "message")
     this.room.send(action.type, action);
   };
 
@@ -313,7 +313,7 @@ export default class Match extends Component<IProps, IState> {
       <>
         <div ref={ this.canvasRef } />
         {
-          state !== "playing" && <div className='select-none absolute top-5 left-1/2 transform -translate-x-1/2 text-dtext font-jmadh text-4xl pointer-events-none'>{ `${ roomName } - ${ playersCount } / ${ playersMaxCount }` }</div>
+          state && state !== "playing" && <div className='select-none absolute top-5 left-1/2 transform -translate-x-1/2 text-dtext font-jmadh text-4xl pointer-events-none'>{ `${ roomName } - ${ playersCount } / ${ playersMaxCount }` }</div>
         }
         {
           state === "waiting" && <div className="bg-rule bg-contain bg-center w-full bg-no-repeat h-36 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />

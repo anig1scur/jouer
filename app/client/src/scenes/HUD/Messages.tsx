@@ -31,7 +31,7 @@ function Message(props: { message: Models.MessageJSON }): React.ReactElement {
   const { message } = props;
 
   return (
-    <div className=' text-dtext text-sm flex gap-2 items-center'>
+    <div className=' text-dtext text-sm flex gap-2 items-center retina:text-xs'>
       <div className='font-thin text-xs text-opacity-75'>{ getMMSSFromTimestamp(message.ts) }</div>
       {/* <div className="text-sm font-semibold text-opacity-80">{ `[${ message.from }]` }</div> */ }
       <div >{ getFormattedMessage(message) }</div>

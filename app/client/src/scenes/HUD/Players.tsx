@@ -10,7 +10,7 @@ export const Players = React.memo(
 
     return (
       <Draggable>
-        <div className='select-none absolute top-2 left-3 cursor-move rounded-xl backdrop-blur-sm shadow p-3 flex flex-col gap-2'>
+        <div className='select-none absolute top-2 left-3 cursor-move rounded-xl backdrop-blur-sm shadow p-3 flex flex-col gap-2 retina:text-xs'>
           {
             props.players.map((player, index) => (
               <Player key={ player.id } player={ player } />

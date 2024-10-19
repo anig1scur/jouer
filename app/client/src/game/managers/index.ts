@@ -86,7 +86,12 @@ export class HandManager extends BaseManager<Card> {
       this.addChild(card.container);
     });
 
-    this.position.set(screen.width / 2 - this.width / 2, screen.height - this.height - 400);
+    if (window.devicePixelRatio > 1) {
+      this.scale.set(0.75);
+      this.position.set(screen.width / 2 - this.width / 2, screen.height - this.height - 280);
+    } else {
+      this.position.set(screen.width / 2 - this.width / 2, screen.height - this.height - 400);
+    }
   }
 
   getSelectedCards() {
@@ -189,7 +194,6 @@ export class TableManager extends BaseManager<Card> {
     this.removeChildren();
     const totalCards = cards.length;
     const totalAngle = Math.PI / 8;
-    this.scale.set(0.8);
 
     cards.forEach((card, index) => {
       const angleStep = totalAngle / totalCards;
@@ -200,7 +204,13 @@ export class TableManager extends BaseManager<Card> {
       this.addChild(card.container);
     });
 
-    this.position.set(screen.width / 2 - this.width * 1.5, screen.height / 2 - this.height * 2.75);
+    if (window.devicePixelRatio > 1) {
+      this.scale.set(0.6);
+      this.position.set(screen.width / 2 - this.width * 1.5, screen.height / 2 - this.height * 2);
+    } else {
+      this.scale.set(0.8);
+      this.position.set(screen.width / 2 - this.width * 1.5, screen.height / 2 - this.height * 2.75);
+    }
   }
 
   reverseCards() {}
@@ -243,7 +253,7 @@ class ActionButton extends BaseEntity {
 
   draw() {
     const background = this.assetsLoader.get('btn');
-    background.scale.set(0.36);
+    background.scale.set(0.35);
     this.container.pivot.set(background.width / 2, background.height / 2);
 
     this.container.onmouseover = () => {
@@ -288,7 +298,11 @@ export class ActionManager extends BaseManager<ActionButton> {
     });
 
     const totalWidth = actions.length * 130;
-    this.position.set(screen.width / 2 - totalWidth / 2, screen.height - this.height - 300);
+    if (window.devicePixelRatio > 1) {
+      this.position.set(screen.width / 2 - totalWidth / 2, screen.height - this.height - 220);
+    } else {
+      this.position.set(screen.width / 2 - totalWidth / 2, screen.height - this.height - 300);
+    }
   }
 
   bindHandler(action: Models.ActionType, handler: () => void) {
