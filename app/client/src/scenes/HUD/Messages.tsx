@@ -61,13 +61,13 @@ function getFormattedMessage(message: Models.MessageJSON): string {
     case 'timeout':
       return `Timeout...`;
     case 'tryBorrow':
-      return `${ message.params.name } 正在借牌`;
+      return `${ message.params.name } is trying to borrow a card`;
     case 'borrow':
-      return `${ message.params.name } 借走了 ${ message.params.card }`;
+      return `${ message.params.name } borrowed ${ message.params.card }`;
     case 'jouer':
-      return `${ message.params.name } 想表演`;
+      return `${ message.params.name } wants to perform`;
     case 'turn':
-      return `现在是 ${ message.params.name } 的回合`;
+      return `It's now ${ message.params.name }'s turn`;
     default:
       return '';
   }

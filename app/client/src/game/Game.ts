@@ -118,8 +118,6 @@ export class JouerGame {
     this.app.stage.addChild(this.handManager);
 
     this.playersManager = new PlayersManager();
-    this.playersManager.zIndex = ZINDEXES.PLAYERS;
-    this.app.stage.addChild(this.playersManager);
 
     this.tableManager = new TableManager();
     this.tableManager.zIndex = ZINDEXES.TABLE;
@@ -268,14 +266,19 @@ export class JouerGame {
     if (isMe) {
       this.me = player;
     }
+  };
 
-    // TODO: ready button
-    this.onActionSend({
-      type: 'ready',
-      playerId,
-      ts: 1,
-      value: '',
-    });
+  playerReady = () => {
+    console.log('playerReady');
+
+    if (!this.me.ready) {
+      this.onActionSend({
+        type: 'ready',
+        playerId: this.me.id,
+        ts: 1,
+        value: '',
+      });
+    }
   };
 
   playerRemove = (playerId: string, isMe: boolean) => {
@@ -294,6 +297,7 @@ export class JouerGame {
     }
 
     player.name = attributes.name;
+    player.ready = attributes.ready;
     player.score = attributes.score;
     player.jouerCount = attributes.jouerCount;
     player.cardCount = attributes.cardCount;
@@ -325,7 +329,6 @@ export class JouerGame {
   };
 
   handUpdate = (cards: any[]) => {
-    console.log(cards, 'handUpdate');
     this.handManager.setCards(
       cards.map((card, idx) => new Card(idx, card.id, card.values, card.owner, card.state, this.handManager, 'hand'))
     );

@@ -86,7 +86,7 @@ export class HandManager extends BaseManager<Card> {
       this.addChild(card.container);
     });
 
-    if (window.devicePixelRatio > 1) {
+    if (window.devicePixelRatio >= 1.5) {
       this.scale.set(0.75);
       this.position.set(screen.width / 2 - this.width / 2, screen.height - this.height - 280);
     } else {
@@ -104,7 +104,6 @@ export class HandManager extends BaseManager<Card> {
     this.emptySlots.forEach((slot) => this.removeChild(slot));
 
     this.borrowingCard = card.clone();
-    console.log('borrowingCard', this.borrowingCard);
     this.borrowingCard.container.position.set(800, -330);
     this.addChild(this.borrowingCard.container);
 
@@ -164,7 +163,6 @@ export class HandManager extends BaseManager<Card> {
   }
 
   private onSlotClick(index: number) {
-    // Handle the slot click event
     console.log(`Slot ${index} clicked`);
     // Here you can implement the logic to insert the borrowing card
     // into the selected position in the this.cards array
@@ -204,7 +202,7 @@ export class TableManager extends BaseManager<Card> {
       this.addChild(card.container);
     });
 
-    if (window.devicePixelRatio > 1) {
+    if (window.devicePixelRatio >= 1.5) {
       this.scale.set(0.6);
       this.position.set(screen.width / 2 - this.width * 1.5, screen.height / 2 - this.height * 2);
     } else {
@@ -298,7 +296,7 @@ export class ActionManager extends BaseManager<ActionButton> {
     });
 
     const totalWidth = actions.length * 130;
-    if (window.devicePixelRatio > 1) {
+    if (window.devicePixelRatio >= 1.5) {
       this.position.set(screen.width / 2 - totalWidth / 2, screen.height - this.height - 220);
     } else {
       this.position.set(screen.width / 2 - totalWidth / 2, screen.height - this.height - 300);

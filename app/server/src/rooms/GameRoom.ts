@@ -1,6 +1,7 @@
 import {Client, Room} from 'colyseus';
 import {Constants, Maths, Models, Types} from '@jouer/common';
 import {GameState} from '../states/GameState';
+import { Player } from '../entities';
 
 export class GameRoom extends Room<GameState> {
   //
@@ -92,7 +93,7 @@ export class GameRoom extends Room<GameState> {
   }
 
   allPlayersReady() {
-    return Array.from(this.state.players.values()).every((player) => player.ready);
+    return Array.from(this.state.players.values()).every((player: Player) => player.ready);
   }
 
   //

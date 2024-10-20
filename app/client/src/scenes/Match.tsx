@@ -125,10 +125,10 @@ export default class Match extends Component<IProps, IState> {
     this.room.state.players.onAdd(this.handlePlayerAdd);
     this.room.state.players.onRemove(this.handlePlayerRemove);
     this.room.state.table.listen("cards", this.handleTableChange);
+    this.room.state.listen("activePlayerId", this.handleActivePlayerChange);
     this.room.state.game.onChange(this.handleGameChange);
     // state 单独监听一下
     this.room.state.game.listen("state", this.handleGameStateChange);
-    this.room.state.listen("activePlayerId", this.handleActivePlayerChange);
 
     // Listen for Messages
     this.room.onMessage('*', this.handleMessage);
@@ -194,11 +194,14 @@ export default class Match extends Component<IProps, IState> {
   handlePlayerAdd = (player: any, playerId: string) => {
     const isMe = this.isPlayerIdMe(playerId);
     this.game.playerAdd(playerId, player, isMe);
+
     player.onChange(() => {
       this.handlePlayerUpdate(player, playerId);
     })
 
     if (isMe) {
+
+
       player.listen("hand", (curCards: any[]) => {
         this.handleCardsChange(curCards);
       })
@@ -209,8 +212,6 @@ export default class Match extends Component<IProps, IState> {
   };
 
   handlePlayerUpdate = (player: any, playerId: string) => {
-    console.log(player, "update")
-
     const isMe = this.isPlayerIdMe(playerId);
     this.game.playerUpdate(playerId, player, isMe);
   };
@@ -240,19 +241,15 @@ export default class Match extends Component<IProps, IState> {
         notice = `Timeout...`;
         break;
       case 'tryBorrow':
-        notice = `${ message.params.name } 正在借牌`;
-        break;
+        return `${ message.params.name } is trying to borrow a card`;
       case 'borrow':
-        notice = `${ message.params.name } 借走了 ${ message.params.card }`;
-        break;
+        return `${ message.params.name } borrowed ${ message.params.card }`;
       case 'jouer':
-        notice = `${ message.params.name } 想表演`;
-        break;
+        return `${ message.params.name } wants to perform`;
       case 'turn':
-        notice = `现在是 ${ message.params.name } 的回合`;
-        break;
+        return `It's now ${ message.params.name }'s turn`;
       default:
-        break;
+        return '';
     }
 
     this.setState((prev) => ({
@@ -297,6 +294,45 @@ export default class Match extends Component<IProps, IState> {
     }));
   }
 
+  renderReadyStatus = (readies: boolean[]) => {
+    return readies.map((ready, index) => {
+      return <div key={ index } className={ `w-4 h-4 rounded-full ${ ready ? 'bg-secondary' : 'border-2 border-secondary' }` } />
+    })
+
+  }
+
+  renderReadyButton = (ready: boolean) => {
+    return <div
+      onPointerDown={ this.game.playerReady }
+      className={ `px-2 rounded-md w-24 shadow-sm ${ !ready ? 'bg-text text-secondary cursor-pointer' : 'bg-secondary text-text cursor-none' }` }>
+      { ready ? 'Ready !' : 'Ready ?' }</div>
+  }
+
+  renderReady = () => {
+    const { hud } = this.state;
+    const {
+      players,
+      playersMaxCount
+    } = hud;
+
+    const me = players.find((player) => player.id === this.room?.sessionId);
+    let statuses = players.map((player) => player.ready);
+    if (statuses.length < playersMaxCount) {
+      statuses = [...statuses, ...Array(playersMaxCount - statuses.length).fill(false)];
+    }
+
+    return (
+      <div className='text-center text-secondary font-jmadh text-3xl select-none absolute top-24 left-1/2 transform -translate-x-1/2 flex gap-5 items-center'>
+        <div className='mr-6 animate-pulse'>Waiting ...</div>
+        <div className='flex justify-between gap-3'>
+          { this.renderReadyStatus(statuses) }
+        </div>
+        { me && this.renderReadyButton(me.ready) }
+      </div>
+    )
+
+  }
+
   // RENDER
   render() {
     const { hud } = this.state;
@@ -311,12 +347,15 @@ export default class Match extends Component<IProps, IState> {
 
     return (
       <>
-        <div ref={ this.canvasRef } />
+        <div className='max-h-screen overflow-hidden' ref={ this.canvasRef } />
         {
-          state && state !== "playing" && <div className='select-none absolute top-5 left-1/2 transform -translate-x-1/2 text-dtext font-jmadh text-4xl pointer-events-none'>{ `${ roomName } - ${ playersCount } / ${ playersMaxCount }` }</div>
+          state !== "playing" && roomName && <div className='select-none absolute top-5 left-1/2 transform -translate-x-1/2 text-secondary font-jmadh text-4xl pointer-events-none'>{ `${ roomName } - ${ playersCount } / ${ playersMaxCount }` }</div>
         }
         {
-          state === "waiting" && <div className="bg-rule bg-contain bg-center w-full bg-no-repeat h-36 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+          state === "waiting" && this.renderReady()
+        }
+        {
+          state === "waiting" && <div className="bg-rules bg-contain bg-center w-full bg-no-repeat h-96 retina:h-80 absolute top-2/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
         }
         <Messages messages={ messages } />
         <Players players={ players } />

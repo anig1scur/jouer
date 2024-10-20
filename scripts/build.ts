@@ -35,7 +35,6 @@ export async function buildClient() {
     sourcemap: BUILD_MODE === 'development',
     publicPath: '/',
     plugins: [
-      // svgrPlugin(),
       tailwindPlugin({}),
       // alias({
       //   assets: '../app/client/src/game/assets',
