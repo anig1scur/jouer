@@ -326,8 +326,8 @@ export default class Match extends Component<IProps, IState> {
     }
 
     return (
-      <div className='text-center text-secondary font-jmadh text-3xl select-none absolute top-24 left-1/2 transform -translate-x-1/2 flex gap-5 items-center'>
-        <div className='mr-6 animate-pulse'>Waiting ...</div>
+      <div className='text-center text-secondary font-jmadh text-3xl retina:text-xl select-none absolute top-24 left-1/2 transform -translate-x-1/2 flex gap-5 items-center'>
+        <div className='mr-6 animate-bounce retina:mr-2'>Waiting ...</div>
         <div className='flex justify-between gap-3'>
           { this.renderReadyStatus(statuses) }
         </div>
@@ -353,13 +353,13 @@ export default class Match extends Component<IProps, IState> {
       <>
         <div className='max-h-screen overflow-hidden' ref={ this.canvasRef } />
         {
-          state !== "playing" && roomName && <div className='select-none absolute top-5 left-1/2 transform -translate-x-1/2 text-secondary font-jmadh text-4xl pointer-events-none'>{ `${ roomName } - ${ playersCount } / ${ playersMaxCount }` }</div>
+          state !== "playing" && roomName && <div className='select-none absolute top-5 left-1/2 transform -translate-x-1/2 text-secondary font-jmadh text-4xl retina:text-2xl pointer-events-none'>{ `${ roomName } - ${ playersCount } / ${ playersMaxCount }` }</div>
         }
         {
           state === "waiting" && this.renderReady()
         }
         {
-          state === "waiting" && <div className="bg-rules bg-contain bg-center w-full bg-no-repeat h-96 retina:h-80 absolute top-2/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+          state === "waiting" && <div className="bg-rules bg-contain bg-center w-full bg-no-repeat h-96 retina:h-64 retina-w-[75%] absolute top-2/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
         }
         <Messages messages={ messages } />
         <Players players={ players } />

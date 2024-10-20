@@ -32,16 +32,16 @@ function Player(props: { player: Models.PlayerJSON }): React.ReactElement {
   return (
     <div className="pointer-events-none flex items-center justify-between text-dtext p-1 rounded-lg gap-3">
       <div className="flex items-center flex-col mr-2">
-        <img src={ Face } alt="Face" className="w-12 h-12" />
+        <img src={ Face } alt="Face" className="w-12 h-12 retina:w-8 retina:h-8" />
         <div className="text-brown-700">{ player.name }</div>
       </div>
       <div className="flex flex-col items-center bg-[#DFA36E] bg-opacity-20 shadow-md gap-3 p-2 rounded-md">
         <div className="flex items-center gap-2">
-          <img src={ Hand } alt="Hand" className="w-6 h-6 mr-1" />
+          <img src={ Hand } alt="Hand" className="w-6 mr-1 retina:w-4 " />
           <div className="text-brown-700">{ player.cardCount }</div>
         </div>
         <div className="flex items-center gap-2">
-          <img src={ Score } alt="Score" className="w-6 h-6 mr-1" />
+          <img src={ Score } alt="Score" className="w-6 mr-1 retina:w-4" />
           <div className="text-brown-700">{ player.score }</div>
         </div>
       </div>

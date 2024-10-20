@@ -15,7 +15,7 @@ export const Messages = React.memo(
 
     return (
       <Draggable>
-        <div className='select-none absolute w-64 max-h-36 h-36 overflow-y-auto flex flex-col-reverse
+        <div className='select-none absolute w-64 max-h-36 h-36 retina:w-52 overflow-y-auto flex flex-col-reverse
         scrollbar-thin scrollbar-thumb-[#DC905A] scrollbar-track-text scrollbar-thumb-rounded-full scrollbar-track-rounded-full
         top-2 right-3 cursor-move rounded-xl backdrop-blur-sm shadow p-3 bg-[#DC905A] bg-opacity-20'>
           { messages.reverse().map((message, index) => (
@@ -32,7 +32,7 @@ function Message(props: { message: Models.MessageJSON }): React.ReactElement {
 
   return (
     <div className=' text-dtext text-sm flex gap-2 items-center retina:text-xs'>
-      <div className='font-thin text-xs text-opacity-75'>{ getMMSSFromTimestamp(message.ts) }</div>
+      <div className='font-thin text-xs retina:text-[0.6rem] text-opacity-75'>{ getMMSSFromTimestamp(message.ts) }</div>
       {/* <div className="text-sm font-semibold text-opacity-80">{ `[${ message.from }]` }</div> */ }
       <div >{ getFormattedMessage(message) }</div>
     </div>
