@@ -241,15 +241,19 @@ export default class Match extends Component<IProps, IState> {
         notice = `Timeout...`;
         break;
       case 'tryBorrow':
-        return `${ message.params.name } is trying to borrow a card`;
+        notice = `${ message.params.name } is trying to borrow a card`;
+        break;
       case 'borrow':
-        return `${ message.params.name } borrowed ${ message.params.card }`;
+        notice = `${ message.params.name } borrowed ${ message.params.card }`;
+        break;
       case 'jouer':
-        return `${ message.params.name } wants to perform`;
+        notice = `${ message.params.name } wants to perform`;
+        break;
       case 'turn':
-        return `It's now ${ message.params.name }'s turn`;
+        notice = `It's now ${ message.params.name }'s turn`;
+        break;
       default:
-        return '';
+        notice = '';
     }
 
     this.setState((prev) => ({
