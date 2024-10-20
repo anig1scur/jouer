@@ -12,5 +12,5 @@ export default function App(): React.ReactElement {
     element: <Match />,
   }]);
 
-  return <div className='bg-bg bg-repeat min-h-screen animate-slidein bg-bgc bg-auto'><RouterProvider router={ BrowserRouter } /></div>
+  return <div className='bg-bg bg-repeat min-h-screen bg-contain animate-slidein bg-bgc'><RouterProvider router={ BrowserRouter } /></div>
 }

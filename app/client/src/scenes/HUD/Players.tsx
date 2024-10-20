@@ -10,7 +10,7 @@ export const Players = React.memo(
 
     return (
       <Draggable>
-        <div className='select-none absolute top-2 left-3 cursor-move rounded-xl backdrop-blur-sm shadow p-3 flex flex-col gap-2 retina:text-xs'>
+        <div className='select-none absolute top-2 left-3 cursor-move rounded-xl backdrop-blur-sm shadow p-3 flex flex-col gap-2 retina:text-sm retina:gap-1'>
           {
             props.players.map((player, index) => (
               <Player key={ player.id } player={ player } />
@@ -31,7 +31,7 @@ function Player(props: { player: Models.PlayerJSON }): React.ReactElement {
 
   return (
     <div className="pointer-events-none flex items-center justify-between text-dtext p-1 rounded-lg gap-3">
-      <div className="flex items-center flex-col mr-2">
+      <div className="flex items-center flex-col">
         <img src={ Face } alt="Face" className="w-12 h-12 retina:w-8 retina:h-8" />
         <div className="text-brown-700">{ player.name }</div>
       </div>

@@ -41,7 +41,7 @@ export class GameRoom extends Room<GameState> {
           this.state.borrowCard(playerId, message.value.cardIdx, message.value.inverse, message.value.targetIdx);
           break;
         case 'jouer':
-          console.log(`${new Date().toISOString()} [Message] id=${playerId} type=${type}`);
+          this.state.tryBorrowCard(playerId, message.value);
           break;
         case 'play':
           this.onPlay(client, message);

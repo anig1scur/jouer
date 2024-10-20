@@ -151,7 +151,7 @@ export class JouerGame {
     });
 
     this.actionManager.bindHandler('jouer', () => {
-      this.jouer(this.me.id);
+      this.jouer(this.me.id, this.tableManager.getSelectedCard());
     });
 
     this.actionManager.bindHandler('borrow', () => {
@@ -178,18 +178,18 @@ export class JouerGame {
     // This might involve skipping players, reversing the order, etc.
   };
 
-  jouer = (playerId: string) => {
+  jouer = (playerId: string, card: Card) => {
     const player = this.playersManager.get(playerId);
     if (!player || player !== this.getCurrentPlayer()) {
       throw new Error("It's not your turn!");
     }
 
-    // Implement jouering logic
-    // This might involve drawing a card from the next player's hand
-    const nextPlayer = this.getNextPlayer();
-    const joueredCard = nextPlayer.removeRandomCard();
-    player.addCardToHand(joueredCard);
-
+    this.onActionSend({
+      type: 'jouer',
+      playerId,
+      ts: 1,
+      value: card.cardIndex,
+    });
     this.nextTurn();
   };
 

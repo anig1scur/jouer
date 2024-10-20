@@ -188,13 +188,11 @@ export class GameState extends Schema {
     }
   }
 
-  borrowCard(playerId: string, cardIdx: number, inverse: boolean, targetIdx: number) {
+  takeOneCardFromTable(playerId: string, cardIdx: number, inverse: boolean, targetIdx: number) {
     const player = this.players.get(playerId);
     if (!player || player !== this.getCurrentPlayer()) {
       throw new Error("Not the player's turn");
     }
-
-    console.log('borrowCard', playerId, cardIdx, inverse, targetIdx);
 
     const card = this.table.borrowCard(cardIdx);
     if (inverse) {
@@ -209,6 +207,16 @@ export class GameState extends Schema {
     owner.addCard(card, targetIdx);
     owner.borrowingCard = null;
     this.table.update();
+  }
+
+  borrowCard(playerId: string, cardIdx: number, inverse: boolean, targetIdx: number) {
+    console.log('borrowCard', playerId, cardIdx, inverse, targetIdx);
+
+    const player = this.players.get(playerId);
+    const card = this.table.cards[cardIdx];
+    if (card) {
+      this.takeOneCardFromTable(playerId, cardIdx, inverse, targetIdx);
+    }
 
     this.onMessage({
       type: 'borrow',
@@ -222,6 +230,22 @@ export class GameState extends Schema {
 
     if (card) {
       this.nextTurn();
+    } else {
+      throw new Error('Cannot borrow this card');
+    }
+  }
+
+  jouerCard(playerId: string, cardIdx: number, inverse: boolean, targetIdx: number) {
+    const player = this.players.get(playerId);
+    const card = player.hand[cardIdx];
+    if (card) {
+      this.takeOneCardFromTable(playerId, cardIdx, inverse, targetIdx);
+      this.onMessage({
+        type: 'jouer',
+        from: 'server',
+        ts: Date.now(),
+        params: {name: player.name, card: card.values},
+      });
     } else {
       throw new Error('Cannot borrow this card');
     }

@@ -26,7 +26,7 @@ module.exports = {
         'dtext': '#70422F'
       },
       backgroundImage: {
-        "bg": "url('./assets/imgs/bg.svg')",
+        "bg": "url('./assets/imgs/bg.png')",
         "wave": "url('./assets/imgs/wave.svg')",
         "dice": "url('./assets/imgs/dice.svg')",
         "face": "url('./assets/imgs/face.svg')",

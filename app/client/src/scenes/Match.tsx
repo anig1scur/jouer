@@ -300,7 +300,7 @@ export default class Match extends Component<IProps, IState> {
 
   renderReadyStatus = (readies: boolean[]) => {
     return readies.map((ready, index) => {
-      return <div key={ index } className={ `w-4 h-4 rounded-full ${ ready ? 'bg-secondary' : 'border-2 border-secondary' }` } />
+      return <div key={ index } className={ `w-4 h-4 rounded-full retina:w-3 retina:h-3 ${ ready ? 'bg-secondary' : 'border-2 border-secondary' }` } />
     })
 
   }
@@ -308,7 +308,7 @@ export default class Match extends Component<IProps, IState> {
   renderReadyButton = (ready: boolean) => {
     return <div
       onPointerDown={ this.game.playerReady }
-      className={ `px-2 rounded-md w-24 shadow-sm ${ !ready ? 'bg-text text-secondary cursor-pointer' : 'bg-secondary text-text cursor-none' }` }>
+      className={ `px-2 rounded-md w-18 shadow-sm ${ !ready ? 'bg-text text-secondary cursor-pointer' : 'bg-secondary text-text cursor-none' }` }>
       { ready ? 'Ready !' : 'Ready ?' }</div>
   }
 
