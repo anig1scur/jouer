@@ -39,7 +39,8 @@ export default class Match extends Component<IProps, IState> {
 
   private timer: NodeJS.Timeout | null = null;
 
-  // BASE
+  private reconnectionToken?: string;
+
   constructor (props: IProps) {
     super(props);
 
@@ -68,103 +69,98 @@ export default class Match extends Component<IProps, IState> {
     this.stop();
   }
 
-  // LIFECYCLE
   start = async () => {
-    // Navigate
-    let roomId = window.location.pathname.replace('/', '');
-    const isNewRoom = roomId === 'new';
-    const params = new URLSearchParams(window.location.search);
-    const search = params.toString();
-    const parsedSearch = qs.parse(search) as Types.IRoomOptions;
+    try {
+      let roomId = window.location.pathname.replace('/', '');
+      const isNewRoom = roomId === 'new';
+      const params = new URLSearchParams(window.location.search);
+      const search = params.toString();
+      const parsedSearch = qs.parse(search) as Types.IRoomOptions;
 
-    let options;
-    if (isNewRoom) {
-      options = {
+      let options = isNewRoom ? {
         ...parsedSearch,
         roomMaxPlayers: Number(parsedSearch.roomMaxPlayers),
-      };
-    } else {
-      // The only thing to pass when joining an existing room is a player's name
-      options = {
+      } : {
         playerName: localStorage.getItem('playerName'),
       };
-    }
 
-    // Connect
-    try {
       const host = window.document.location.host.replace(/:.*/, '');
       const port = process.env.NODE_ENV !== 'production' ? Constants.WS_PORT : window.location.port;
       const url = `${ window.location.protocol.replace('http', 'ws') }//${ host }${ port ? `:${ port }` : '' }`;
 
       this.client = new Client(url);
+
       if (isNewRoom) {
         this.room = await this.client.create(Constants.ROOM_NAME, options);
-
-        // We replace the "new" in the URL with the room's id
         window.history.replaceState(null, '', `/${ this.room.id }`);
       } else {
         this.room = await this.client.joinById(roomId, options);
       }
+
+      // Store the reconnection token
+      this.reconnectionToken = this.room.reconnectionToken;
+
+      this.setState(prev => ({
+        ...prev,
+        hud: {
+          ...prev.hud,
+          playerId: this.room ? this.room.sessionId : '',
+        },
+      }));
+
+      this.room.state.players.onAdd(this.handlePlayerAdd);
+      this.room.state.players.onRemove(this.handlePlayerRemove);
+      this.room.state.table.listen("cards", this.handleTableChange);
+      this.room.state.listen("activePlayerId", this.handleActivePlayerChange);
+      this.room.state.game.onChange(this.handleGameChange);
+      this.room.state.game.listen("state", this.handleGameStateChange);
+      this.room.onMessage('*', this.handleMessage);
+
+      this.game.start(this.canvasRef.current as HTMLDivElement);
+
+      window.addEventListener('resize', this.handleWindowResize);
+      this.timer = setInterval(this.updateRoom, Constants.PLAYERS_REFRESH);
+
+      // Handle reconnection
+      this.room.onLeave(this.handleConnectionLost);
+      this.room.onError(this.handleConnectionLost);
     } catch (error) {
-      // navigate('/');
       console.error('Error connecting to server', error);
       window.location.href = '/';
-      return;
     }
+  };
 
-    // Set the current player id
-    this.setState((prev) => ({
-      ...prev,
-      hud: {
-        ...prev.hud,
-        playerId: this.room ? this.room.sessionId : '',
-      },
-    }));
-
-    // Listen for state changes
-    this.room.state.players.onAdd(this.handlePlayerAdd);
-    this.room.state.players.onRemove(this.handlePlayerRemove);
-    this.room.state.table.listen("cards", this.handleTableChange);
-    this.room.state.listen("activePlayerId", this.handleActivePlayerChange);
-    this.room.state.game.onChange(this.handleGameChange);
-    // state 单独监听一下
-    this.room.state.game.listen("state", this.handleGameStateChange);
-
-    // Listen for Messages
-    this.room.onMessage('*', this.handleMessage);
-
-    // Start game
-    this.game.start(this.canvasRef.current as HTMLDivElement);
-
-    // Listen for inputs
-    window.addEventListener('resize', this.handleWindowResize);
-
-    // Start players refresh listeners
-    this.timer = setInterval(this.updateRoom, Constants.PLAYERS_REFRESH);
+  handleConnectionLost = async () => {
+    if (this.reconnectionToken) {
+      try {
+        this.room = await this.client!.reconnect(this.reconnectionToken);
+        console.log('Reconnected successfully');
+        this.setState(prev => ({
+          ...prev,
+          hud: {
+            ...prev.hud,
+            playerId: this.room ? this.room.sessionId : '',
+          },
+        }));
+      } catch (error) {
+        console.error('Reconnection failed', error);
+        window.location.href = '/';  // Handle failed reconnection
+      }
+    }
   };
 
   stop = () => {
-    // Colyseus
     if (this.room) {
       this.room.leave();
     }
-
-    // Game
     this.game.stop();
-
-    // Inputs
     window.removeEventListener('resize', this.handleWindowResize);
-
-    // Start players refresh listeners
     if (this.timer) {
       clearInterval(this.timer);
     }
   };
 
-  // HANDLERS: Colyseus
-
   handleCardsChange = (curCards: Card[]) => {
-    // this.game.gameUpdate('hand', curCards);
     this.game.handUpdate(curCards);
   }
 
@@ -200,8 +196,6 @@ export default class Match extends Component<IProps, IState> {
     })
 
     if (isMe) {
-
-
       player.listen("hand", (curCards: any[]) => {
         this.handleCardsChange(curCards);
       })
@@ -247,7 +241,7 @@ export default class Match extends Component<IProps, IState> {
         notice = `${ message.params.name } borrowed ${ message.params.card }`;
         break;
       case 'jouer':
-        notice = `${ message.params.name } wants to perform`;
+        notice = `${ message.params.name } wants to jouer`;
         break;
       case 'turn':
         notice = `It's now ${ message.params.name }'s turn`;
@@ -276,7 +270,6 @@ export default class Match extends Component<IProps, IState> {
     this.room.send(action.type, action);
   };
 
-  // HANDLERS: Inputs
   handleWindowResize = () => {
     // this.game.setScreenSize(window.innerWidth, window.innerHeight);
   };

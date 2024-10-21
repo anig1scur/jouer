@@ -65,7 +65,7 @@ function getFormattedMessage(message: Models.MessageJSON): string {
     case 'ack':
       return `${ message.params.name } borrowed ${ message.params.card }`;
     case 'jouer':
-      return `${ message.params.name } wants to perform`;
+      return `${ message.params.name } wants to jouer`;
     case 'turn':
       return `It's now ${ message.params.name }'s turn`;
     default:
