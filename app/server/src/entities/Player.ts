@@ -39,6 +39,9 @@ export class Player extends Schema {
   @type(Card)
   public borrowingCard: Card;
 
+  @type('string')
+  public lastAction: string;
+
   public firstHand: boolean;
 
   // Init
@@ -52,8 +55,9 @@ export class Player extends Schema {
     this.hand = new ArraySchema<Card>();
   }
 
-  tryBorrowCard(card: Card) {
+  tryGetCard(card: Card, action: string): void {
     this.borrowingCard = card;
+    this.lastAction = action;
   }
 
   addCard(card: Card, idx?: number): void {
@@ -89,8 +93,12 @@ export class Player extends Schema {
     this.jouerCount--;
   }
 
+  jouerCard(card: Card, idx: number): void {
+  }
+
   eatCards(cards: Card[]): void {
     this.score += cards.length;
+    this.lastAction = "play"
   }
 
   incrementBorrowedCount(): void {

@@ -6,9 +6,9 @@ export type MessageType =
   | 'won'
   | 'left'
   | 'timeout'
-  | 'tryBorrow'
   | 'borrow'
   | 'jouer'
+  | 'ack'
   | 'turn';
 
 export interface MessageJSON {

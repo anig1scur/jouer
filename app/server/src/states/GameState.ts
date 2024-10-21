@@ -1,6 +1,7 @@
 import {Schema, type, MapSchema, ArraySchema, filter} from '@colyseus/schema';
 import {Player, Card, Deck, Table, Game} from '../entities';
 import {Models} from '@jouer/common';
+import {MessageType} from '@jouer/common/src/models';
 
 export class GameState extends Schema {
   @type(Game)
@@ -168,7 +169,7 @@ export class GameState extends Schema {
     }
   }
 
-  tryBorrowCard(playerId: string, cardIdx: number) {
+  tryGetCard(playerId: string, cardIdx: number, action: 'borrow' | 'jouer') {
     const player = this.players.get(playerId);
     if (!player || player !== this.getCurrentPlayer()) {
       throw new Error("Not the player's turn");
@@ -176,9 +177,9 @@ export class GameState extends Schema {
 
     const card = this.table.cards[cardIdx];
     if (card) {
-      player.tryBorrowCard(card);
+      player.tryGetCard(card, action);
       this.onMessage({
-        type: 'tryBorrow',
+        type: action,
         from: 'server',
         ts: Date.now(),
         params: {name: player.name},
@@ -209,9 +210,7 @@ export class GameState extends Schema {
     this.table.update();
   }
 
-  borrowCard(playerId: string, cardIdx: number, inverse: boolean, targetIdx: number) {
-    console.log('borrowCard', playerId, cardIdx, inverse, targetIdx);
-
+  ackGetCard(playerId: string, cardIdx: number, inverse: boolean, targetIdx: number) {
     const player = this.players.get(playerId);
     const card = this.table.cards[cardIdx];
     if (card) {
@@ -219,7 +218,7 @@ export class GameState extends Schema {
     }
 
     this.onMessage({
-      type: 'borrow',
+      type: player.lastAction as MessageType,
       from: 'server',
       ts: Date.now(),
       params: {
@@ -229,7 +228,9 @@ export class GameState extends Schema {
     });
 
     if (card) {
-      this.nextTurn();
+      if (player.lastAction === 'borrow') {
+        this.nextTurn();
+      }
     } else {
       throw new Error('Cannot borrow this card');
     }
@@ -254,7 +255,7 @@ export class GameState extends Schema {
   private nextTurn() {
     const idx = Array.from(this.players.keys()).indexOf(this.activePlayerId);
     const nextIdx = (idx + 1) % this.players.size;
-    this.activePlayerId = Array.from(this.players.keys())[nextIdx];
+    this.activePlayerId = Array.from(this.players.keys())[nextIdx] as string;
 
     this.onMessage({
       type: 'turn',

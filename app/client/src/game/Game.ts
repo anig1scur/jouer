@@ -67,8 +67,6 @@ export class JouerGame {
     this.app = app;
     this.app.init({
       backgroundAlpha: 0,
-      // width: screenWidth,
-      // height: screenHeight,
       width: screenWidth * window.devicePixelRatio,
       height: screenHeight * window.devicePixelRatio,
       resizeTo: window,
@@ -113,7 +111,7 @@ export class JouerGame {
       sprite.height = window.innerHeight;
     });
 
-    this.handManager = new HandManager(this.borrowCard);
+    this.handManager = new HandManager(this.ack);
     this.handManager.zIndex = ZINDEXES.CARDS;
     this.app.stage.addChild(this.handManager);
 
@@ -160,15 +158,10 @@ export class JouerGame {
   };
 
   playCards = (playerId: string, cards: Card[]) => {
-    const player = this.playersManager.get(playerId);
-    if (!player || player !== this.getCurrentPlayer()) {
-      throw new Error("It's not your turn!");
-    }
-
     this.onActionSend({
       type: 'play',
       playerId,
-      ts: 1,
+      ts: Date.now(),
       value: cards.map((card) => card.cardIndex).join(','),
     });
   };
@@ -179,45 +172,30 @@ export class JouerGame {
   };
 
   jouer = (playerId: string, card: Card) => {
-    const player = this.playersManager.get(playerId);
-    if (!player || player !== this.getCurrentPlayer()) {
-      throw new Error("It's not your turn!");
-    }
-
     this.onActionSend({
       type: 'jouer',
       playerId,
-      ts: 1,
+      ts: Date.now(),
       value: card.cardIndex,
     });
-    this.nextTurn();
   };
 
   preBorrowCard = (playerId: string, card: Card) => {
-    const player = this.playersManager.get(playerId);
-    if (!player || player !== this.getCurrentPlayer()) {
-      throw new Error("It's not your turn!");
-    }
-
     this.onActionSend({
-      type: 'tryBorrow',
+      type: 'borrow',
       playerId,
-      ts: 1,
+      ts: Date.now(),
       value: card.cardIndex,
     });
     this.nextTurn();
   };
 
-  borrowCard = (cardIdx: number, inverse: boolean, targetIdx: number) => {
-    // const player = this.playersManager.get(playerId);
-    // if (!player || player !== this.getCurrentPlayer()) {
-    //   throw new Error("It's not your turn!");
-    // }
-
+  ack = (cardIdx: number, inverse: boolean, targetIdx: number) => {
+    // action: "borrow" | "jouer"
     this.onActionSend({
-      type: 'borrow',
+      type: "ack",
       playerId: this.me.id,
-      ts: 1,
+      ts: Date.now(),
       value: {cardIdx, inverse, targetIdx},
     });
   };
@@ -275,7 +253,7 @@ export class JouerGame {
       this.onActionSend({
         type: 'ready',
         playerId: this.me.id,
-        ts: 1,
+        ts: Date.now(),
         value: '',
       });
     }

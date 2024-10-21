@@ -240,10 +240,10 @@ export default class Match extends Component<IProps, IState> {
       case 'timeout':
         notice = `Timeout...`;
         break;
-      case 'tryBorrow':
+      case 'borrow':
         notice = `${ message.params.name } is trying to borrow a card`;
         break;
-      case 'borrow':
+      case 'ack':
         notice = `${ message.params.name } borrowed ${ message.params.card }`;
         break;
       case 'jouer':

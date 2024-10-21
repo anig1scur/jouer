@@ -34,15 +34,15 @@ export class GameRoom extends Room<GameState> {
 
       // Validate which type of message is accepted
       switch (type) {
-        case 'tryBorrow':
-          this.state.tryBorrowCard(playerId, message.value);
-          break;
         case 'borrow':
-          this.state.borrowCard(playerId, message.value.cardIdx, message.value.inverse, message.value.targetIdx);
+        case 'jouer':
+          this.state.tryGetCard(playerId, message.value, type);
+          break;
+        case 'ack':
+          this.state.ackGetCard(playerId, message.value.cardIdx, message.value.inverse, message.value.targetIdx);
           break;
         case 'jouer':
-          this.state.tryBorrowCard(playerId, message.value);
-          break;
+          this.state.jouerCard(playerId, message.value.cardIdx, message.value.inverse, message.value.targetIdx);
         case 'play':
           this.onPlay(client, message);
           break;

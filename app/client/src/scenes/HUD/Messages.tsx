@@ -60,9 +60,9 @@ function getFormattedMessage(message: Models.MessageJSON): string {
       return `${ message.params.name } left.`;
     case 'timeout':
       return `Timeout...`;
-    case 'tryBorrow':
-      return `${ message.params.name } is trying to borrow a card`;
     case 'borrow':
+      return `${ message.params.name } is trying to borrow a card`;
+    case 'ack':
       return `${ message.params.name } borrowed ${ message.params.card }`;
     case 'jouer':
       return `${ message.params.name } wants to perform`;
