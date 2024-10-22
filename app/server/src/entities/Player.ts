@@ -93,12 +93,11 @@ export class Player extends Schema {
     this.jouerCount--;
   }
 
-  jouerCard(card: Card, idx: number): void {
-  }
+  jouerCard(card: Card, idx: number): void {}
 
   eatCards(cards: Card[]): void {
     this.score += cards.length;
-    this.lastAction = "play"
+    this.lastAction = 'play';
   }
 
   incrementBorrowedCount(): void {

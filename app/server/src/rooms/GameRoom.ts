@@ -41,8 +41,6 @@ export class GameRoom extends Room<GameState> {
         case 'ack':
           this.state.ackGetCard(playerId, message.value.cardIdx, message.value.inverse, message.value.targetIdx);
           break;
-        case 'jouer':
-          this.state.jouerCard(playerId, message.value.cardIdx, message.value.inverse, message.value.targetIdx);
         case 'play':
           this.onPlay(client, message);
           break;

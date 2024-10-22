@@ -236,22 +236,6 @@ export class GameState extends Schema {
     }
   }
 
-  jouerCard(playerId: string, cardIdx: number, inverse: boolean, targetIdx: number) {
-    const player = this.players.get(playerId);
-    const card = player.hand[cardIdx];
-    if (card) {
-      this.takeOneCardFromTable(playerId, cardIdx, inverse, targetIdx);
-      this.onMessage({
-        type: 'jouer',
-        from: 'server',
-        ts: Date.now(),
-        params: {name: player.name, card: card.values},
-      });
-    } else {
-      throw new Error('Cannot borrow this card');
-    }
-  }
-
   private nextTurn() {
     const idx = Array.from(this.players.keys()).indexOf(this.activePlayerId);
     const nextIdx = (idx + 1) % this.players.size;

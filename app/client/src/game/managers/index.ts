@@ -7,7 +7,7 @@ import {Card} from '../entities/Card';
 import {Player} from '../entities/Player';
 import {Models} from '@jouer/common/src';
 import {AssetsLoader} from '../../utils/pixitool';
-import Btn from '../assets/btn.png';
+import Btn from '../../assets/imgs/btn.png';
 
 export class BaseManager<T extends BaseEntity> extends Container {
   protected container: Container;

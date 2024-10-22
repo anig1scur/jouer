@@ -1,9 +1,8 @@
 import React, { Fragment } from 'react';
 import { Models } from '@jouer/common';
 import Draggable from 'react-draggable';
-import Hand from '../../game/assets/hand.png';
-import Face from '../../game/assets/face.png';
-import Score from '../../game/assets/score.png';
+import Hand from '../../assets/imgs/hand.png';
+import Score from '../../assets/imgs/score.png';
 
 export const Players = React.memo(
   (props: { players: Models.PlayerJSON[] }): React.ReactElement | null => {
@@ -32,10 +31,10 @@ function Player(props: { player: Models.PlayerJSON }): React.ReactElement {
   return (
     <div className="pointer-events-none flex items-center justify-between text-dtext p-1 rounded-lg gap-3">
       <div className="flex items-center flex-col">
-        <img src={ Face } alt="Face" className="w-12 h-12 retina:w-8 retina:h-8" />
+        <div className='bg-face w-12 h-12 retina:w-8 retina:h-8 rounded-full bg-contain' />
         <div className="text-brown-700">{ player.name }</div>
       </div>
-      <div className="flex flex-col items-center bg-[#DFA36E] bg-opacity-20 shadow-md gap-3 p-2 rounded-md">
+      <div className="flex flex-col items-center bg-[#DFA36E] bg-opacity-20 shadow-md gap-2 p-2 rounded-md">
         <div className="flex items-center gap-2">
           <img src={ Hand } alt="Hand" className="w-6 mr-1 retina:w-4 " />
           <div className="text-brown-700">{ player.cardCount }</div>

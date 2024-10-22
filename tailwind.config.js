@@ -15,7 +15,7 @@ module.exports = {
         },
       },
       screens: {
-        'retina': { 'min-device-pixel-ratio': 1.5 },
+        'retina': { 'raw': '(-webkit-min-device-pixel-ratio: 1.75), (min-resolution: 192dpi)' },
       },
       colors: {
         'bgc': '#FFE6BD',
@@ -29,8 +29,9 @@ module.exports = {
         "bg": "url('./assets/imgs/bg.png')",
         "wave": "url('./assets/imgs/wave.svg')",
         "dice": "url('./assets/imgs/dice.svg')",
-        "face": "url('./assets/imgs/face.svg')",
+        "face": "url('./assets/imgs/face.png')",
         "hand": "url('./assets/imgs/hand.png')",
+        "bline": "url('./assets/imgs/board_line.png')",
         "score": "url('./assets/imgs/score.png')",
         "rules": "url('./assets/imgs/rules.png')",
       },

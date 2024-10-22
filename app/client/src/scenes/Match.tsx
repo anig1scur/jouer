@@ -352,7 +352,7 @@ export default class Match extends Component<IProps, IState> {
           state === "waiting" && this.renderReady()
         }
         {
-          state === "waiting" && <div className="bg-rules bg-contain bg-center w-full bg-no-repeat h-96 retina:h-64 retina-w-[75%] absolute top-2/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+          state === "waiting" && <div className="bg-rules bg-contain bg-center w-full bg-no-repeat h-80 retina:h-64 retina-w-[70%] absolute top-2/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
         }
         <Messages messages={ messages } />
         <Players players={ players } />
