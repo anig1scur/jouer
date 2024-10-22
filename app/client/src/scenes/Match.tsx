@@ -195,6 +195,7 @@ export default class Match extends Component<IProps, IState> {
       this.handlePlayerUpdate(player, playerId);
     })
 
+
     if (isMe) {
       player.listen("hand", (curCards: any[]) => {
         this.handleCardsChange(curCards);

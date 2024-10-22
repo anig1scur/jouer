@@ -218,6 +218,8 @@ export class JouerGame {
       status: player.status,
       cardCount: player.cardCount,
       jouerCount: player.jouerCount,
+      borrowedCount: player.borrowedCount,
+      eatCount: player.eatCount,
     });
 
     const roomName = this.roomName;

@@ -11,7 +11,7 @@ export const Leaderboard = ({ players }: { players: Models.PlayerJSON[] }) => {
 
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+    <div className="inset-0 bg-black bg-opacity-40 flex items-center justify-center absolute z-50">
       <div className="bg-amber-100 text-dtext text-center p-6 rounded-lg shadow-md max-w-2xl w-full mx-4 relative">
         <h1 className="text-5xl text-dtext mb-4 text-center font-kreon">LEADERBOARD</h1>
         <table className="w-full border-collapse">
