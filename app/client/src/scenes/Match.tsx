@@ -5,7 +5,7 @@ import { Constants, Models, Types } from '@jouer/common';
 
 import { JouerGame as Game } from '../game/Game';
 import qs from 'querystringify';
-import { Messages, Players } from "./HUD";
+import { Messages, Players, Leaderboard } from "./HUD";
 import { Card } from '../game/entities/Card';
 
 interface IProps {
@@ -349,11 +349,13 @@ export default class Match extends Component<IProps, IState> {
           state !== "playing" && roomName && <div className='select-none absolute top-5 left-1/2 transform -translate-x-1/2 text-secondary font-jmadh text-4xl retina:text-2xl pointer-events-none'>{ `${ roomName } - ${ playersCount } / ${ playersMaxCount }` }</div>
         }
         {
-          state === "waiting" && this.renderReady()
+          state === "waiting" &&
+          <>
+            { this.renderReady() }
+            <div className="bg-rules bg-contain bg-center w-full bg-no-repeat h-80 retina:h-64 retina-w-[70%] absolute top-2/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+          </>
         }
-        {
-          state === "waiting" && <div className="bg-rules bg-contain bg-center w-full bg-no-repeat h-80 retina:h-64 retina-w-[70%] absolute top-2/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
-        }
+        { state === "awarding" && <Leaderboard players={ players } /> }
         <Messages messages={ messages } />
         <Players players={ players } />
         <div className='select-none absolute top-2 left-1/2 transform text-opacity-75 -translate-x-1/2 w-52 max-h-36 text-dtext'>

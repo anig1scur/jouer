@@ -94,13 +94,6 @@ export class Game extends Schema {
   }
 
   updateGame(players: MapSchema<Player>) {
-    // If a player is alone, the game stops.
-    if (gameEnd()) {
-      this.onGameEnd();
-      this.startWaiting();
-      return;
-    }
-
     // If the time is out, the game stops.
     if (this.gameEndsAt && this.gameEndsAt < Date.now()) {
       this.onGameEnd({
@@ -114,7 +107,7 @@ export class Game extends Schema {
       return;
     }
 
-    if (gameEnd()) {
+    if (gameEnd(players)) {
       const player = getWinningPlayer(players);
       if (player) {
         this.onGameEnd({
@@ -166,9 +159,18 @@ export class Game extends Schema {
   }
 }
 
-function gameEnd() {
-  // Implement the game end logic here
-  return false;
+function gameEnd(players: MapSchema<Player>) {
+  // any player has no card
+  let end = false;
+  // any
+
+  players.forEach((player) => {
+    if (player.cardCount === 0) {
+      end = true;
+    }
+  });
+
+  return end;
 }
 
 function countPlayers(players: MapSchema<Player>) {

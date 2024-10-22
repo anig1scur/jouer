@@ -162,6 +162,8 @@ export class GameState extends Schema {
       player.playCards(cards);
       player.eatCards([...this.table.cards]);
       this.table.setCards(cards);
+      this.game.update(this.players);
+
       this.nextTurn();
     } else {
       // throw new Error('Invalid play');
@@ -237,6 +239,10 @@ export class GameState extends Schema {
   }
 
   private nextTurn() {
+    if (this.game.state !== 'playing') {
+      return;
+    }
+
     const idx = Array.from(this.players.keys()).indexOf(this.activePlayerId);
     const nextIdx = (idx + 1) % this.players.size;
     this.activePlayerId = Array.from(this.players.keys())[nextIdx] as string;

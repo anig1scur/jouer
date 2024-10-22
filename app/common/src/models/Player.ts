@@ -19,6 +19,8 @@ export interface PlayerJSON {
   ready?: boolean;
   cardCount: number;
   jouerCount: number;
+  borrowedCount: number;
+  eatCount: number;
   hand?: CardJSON[];
   status?: PlayerStatus;
 }

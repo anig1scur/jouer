@@ -9,6 +9,8 @@ export class Player extends BaseEntity {
   public score: number = 0;
   public jouerCount: number = 0;
   public cardCount: number = 0;
+  public borrowedCount: number = 0;
+  public eatCount: number = 0;
   public status: Models.PlayerStatus = Models.PlayerStatus.default;
   private hand: Card[] = [];
 

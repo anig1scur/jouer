@@ -30,6 +30,12 @@ export class Player extends Schema {
   @type('number')
   public jouerCount: number = 3;
 
+  @type('number')
+  public borrowedCount: number = 0;
+
+  @type('number')
+  public eatCount: number = 0;
+
   @type('string')
   public status: Models.PlayerStatus;
 
@@ -97,11 +103,12 @@ export class Player extends Schema {
 
   eatCards(cards: Card[]): void {
     this.score += cards.length;
+    this.eatCount += cards.length;
     this.lastAction = 'play';
   }
 
   incrementBorrowedCount(): void {
     this.score++;
-    // this.borrowedCount++;
+    this.borrowedCount++;
   }
 }

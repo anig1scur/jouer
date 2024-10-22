@@ -279,6 +279,8 @@ export class JouerGame {
     player.score = attributes.score;
     player.jouerCount = attributes.jouerCount;
     player.cardCount = attributes.cardCount;
+    player.borrowedCount = attributes.borrowedCount;
+    player.eatCount = attributes.eatCount;
 
     if (isMe) {
       this.me = player;
