@@ -51,6 +51,7 @@ export class JouerGame {
   private gameEndsAt: number;
   private maxPlayers: number;
   private mode: string;
+  private handReverseDone: boolean;
 
   private me: Player;
   private app: Application;
@@ -187,7 +188,6 @@ export class JouerGame {
       ts: Date.now(),
       value: card.cardIndex,
     });
-    this.nextTurn();
   };
 
   ack = (cardIdx: number, inverse: boolean, targetIdx: number) => {
@@ -297,6 +297,7 @@ export class JouerGame {
     this.awardEndsAt = gameState.awardEndsAt;
     this.gameEndsAt = gameState.gameEndsAt;
     this.maxPlayers = gameState.maxPlayers;
+    this.handReverseDone = gameState.handReverseDone;
   };
 
   activePlayerUpdate = (playerId: string) => {

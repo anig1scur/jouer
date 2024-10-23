@@ -25,11 +25,17 @@ export class Game extends Schema {
   public gameEndsAt: number;
 
   @type('number')
+  public handReverseEndsAt: number;
+
+  @type('number')
   public maxPlayers: number;
 
   @type('string')
   public mode: string = 'jouer';
   // only one normal mode for now
+
+  @type('boolean')
+  public handReverseDone: boolean = false;
 
   private onWaitingStart: (message?: Models.MessageJSON) => void;
 
@@ -59,6 +65,7 @@ export class Game extends Schema {
     this.onGameStart = attributes.onGameStart;
     this.onGameEnd = attributes.onGameEnd;
     this.state = 'waiting';
+    this.handReverseDone = false;
   }
 
   // Update
@@ -103,7 +110,11 @@ export class Game extends Schema {
         params: {},
       });
       this.startAwarding();
+      return;
+    }
 
+    if (this.handReverseEndsAt && this.handReverseEndsAt < Date.now()) {
+      this.handReverseDone = true;
       return;
     }
 
@@ -155,6 +166,7 @@ export class Game extends Schema {
     this.state = 'playing';
     this.awardEndsAt = undefined;
     this.gameEndsAt = Date.now() + Constants.GAME_DURATION;
+    this.handReverseEndsAt = Date.now() + Constants.HAND_REVERSE_DURATION;
     this.onGameStart();
   }
 }
@@ -162,8 +174,6 @@ export class Game extends Schema {
 function gameEnd(players: MapSchema<Player>) {
   // any player has no card
   let end = false;
-  // any
-
   players.forEach((player) => {
     if (player.cardCount === 0) {
       end = true;

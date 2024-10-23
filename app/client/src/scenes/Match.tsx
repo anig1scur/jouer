@@ -97,7 +97,6 @@ export default class Match extends Component<IProps, IState> {
         this.room = await this.client.joinById(roomId, options);
       }
 
-      // Store the reconnection token
       this.reconnectionToken = this.room.reconnectionToken;
 
       this.setState(prev => ({

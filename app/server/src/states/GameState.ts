@@ -259,15 +259,6 @@ export class GameState extends Schema {
     return this.players.get(this.activePlayerId);
   }
 
-  private endGame(winner: Player) {
-    this.onMessage({
-      type: 'stop',
-      from: 'server',
-      ts: Date.now(),
-      params: {winnerId: winner.id, winnerName: winner.name},
-    });
-  }
-
   private handleWaitingStart = () => {
     this.onMessage({
       type: 'waiting',
